@@ -1,0 +1,45 @@
+Copyright (c) 2026 Patrik Goldschmidt <goldschmidt.patrik@gmail.com>
+
+The part of this project consisting of LaTeX source files and its associated
+documentation (files listed below) may be distributed and/or modified under the
+conditions of the LaTeX Project Public License, either version 1.3c of this
+license or (at your option) any later version. The latest version of this
+license is in https://www.latex-project.org/lppl.txt and version 1.3c or later
+is part of all distributions of LaTeX version 2008 or later.
+
+This work has the LPPL maintenance status `maintained'.
+
+The Current Maintainer of this work is Patrik Goldschmidt.
+
+For the context of this license, the following files are considered to be a
+part of the project:
+    - lucidcv.cls
+    - main.tex
+    - README.md
+    - latexmkrc
+    - resources/docs.md (only present on GitHub)
+
+Bundled fonts (Inter, Source Sans 3, Source Code Pro) are under the SIL Open
+Font License; see the OFL.txt file in each font folder.
+
+
+For all other files bundled in this project and not explicitly mentioned
+above, particularly the compilation script (build.sh), package script (package.sh)
+and associated tests within the tests/ folder, the following license applies:
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the “Software”), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

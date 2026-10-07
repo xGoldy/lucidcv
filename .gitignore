@@ -1,0 +1,81 @@
+# ---------- Project specific ----------
+# Ignoring all PDFs could potentially remove PDF figures
+resume*.pdf
+
+# Compilation environment folder (or its symbolic link)
+.texenv
+
+# Release package built by package.sh.
+dist/
+
+# main.tex with --opt class options spliced in, written by build.sh beside the
+# source for the length of a build (main-twocolumn.tex, ...) and removed on exit.
+main-*.tex
+
+# Test suite: tests/env is regenerable environment, out/ are test results.
+tests/out/
+tests/env
+
+# Python leaves bytecode behind wherever a check imports a sibling module.
+__pycache__/
+
+# ----- LaTeX generic ----------
+
+## Core latex/pdflatex auxiliary files:
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+
+## Intermediate documents:
+*.dvi
+*.xdv
+*-converted-to.*
+
+## Generated if empty string is given at "Please type another file name for output:"
+.pdf
+
+## Bibliography auxiliary files (bibtex/biblatex/biber):
+*.bbl
+*.bbl-SAVE-ERROR
+*.bcf
+*.bcf-SAVE-ERROR
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+## Build tool auxiliary files:
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+*.rubbercache
+rubber.cache
+
+## Build tool directories for auxiliary files
+latex.out/
+
+# changes
+*.soc
+*.loc
+
+# comment
+*.cut
+
+# context
+*.tuc
+*.tui
+*.tuo
+
+.*.swp

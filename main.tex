@@ -1,0 +1,122 @@
+%% Lucid CV sample main LaTeX file.
+%%
+%% The main file carries the document settings and the header; the body is in
+%% the separate content file.
+%%
+%% Author: Patrik Goldschmidt
+%% Date: 2026-08-19, last rev. 2026-10-07
+
+%% Metadata: PDF/A conformance and for real-world ATS parsers (tagging)
+\DocumentMetadata{pdfstandard=A-2b,tagging=on,lang=en-US}
+\tagpdfsetup{math/mathml/luamml/load=false}
+
+%% Class options:
+%%   noicons          no icon glyphs present in the document
+%%   photo            include a header photo
+%%   hyper            clickable links (recommended)
+%%   noheadingrule    drop the hairline under section headings
+%%   onecolumn        body in one column (default)
+%%   twocolumn        body in two columns instead of one. The header does not change
+%%   compressed       tighten section fonts and spacing to save space
+\documentclass[10pt,a4paper,hyper,photo,onecolumn]{lucidcv}
+
+%% Own packages
+% ...
+
+%% The template's accent color:
+%%   \cvaccent{B03A2E}             HTML, the default model
+%%   \cvaccent[RGB]{29,118,226}    other xcolor models
+%%   \cvaccent[named]{OliveGreen}  a color known to xcolor: 19 base names + 68 dvipsnames
+\cvaccent{1D76E2}
+
+%% Page geometry and column split. Defaults are the same as commented out.
+%% Column ratio accepts only a single float in a range of (0, 1), nothing else.
+% \geometry{left=1.2cm,right=1.2cm,top=1.2cm,bottom=1.2cm,columnsep=1.1cm}
+% \columnratio{0.65}
+
+%% Header text sizes in pts (Defaults: name: 38, tagline: 15)
+% \renewcommand{\cvnamesize}{34}
+% \renewcommand{\cvtaglinesize}{13}
+
+%% Header gaps: extra space to add between name-tagline/tagline-contact blocks.
+%% Defaults: 0.1em, 0.25em
+% \renewcommand{\nametaggap}{0.1em}
+% \renewcommand{\tagcontactgap}{0.25em}
+
+%% These settings are set by the `compressed` option. Set only if you want to override them.
+%% (Sub)Section font sizes. Defaults (compressed): section: 16 (13), subsection: 11 (10)
+% \renewcommand{\cvsectionsize}{13}
+% \renewcommand{\cvsubsectionsize}{10}
+
+%% Additional spacing for items and section headings.
+%% Defaults are written normal (compressed), as in the font sizes above.
+% \renewcommand{\cvitemsep}{0pt}          % gap BETWEEN bullets: 0.15em (0.1em)
+% \renewcommand{\cvitemtopsep}{0pt}       % gap entry line -> 1st bullet: 0.2em (0.1em)
+% \renewcommand{\cvsectiongapratio}{0.6}  % air ABOVE each heading: 1.0 (0.7)
+% \renewcommand{\cvrulegaptrim}{0em}      % trim air around a section rule: 0em (0.25em) -> bigger = TIGHTER
+
+
+%% PDF document metadata -- what an application reads from the file itself
+%% Defaults from \name and \tagline below, but can be specified explicitly if desired
+% \cvtitle{Your Name Here -- Curriculum Vitae}
+% \cvauthor{Your Name Here}
+% \cvsubject{Curriculum Vitae}
+\cvkeywords{curriculum vitae, resume, software engineer, programming, artificial intelligence, machine learning}
+
+
+\begin{document}
+
+%% \name takes 2 arguments (SemiBold, Light). Use \fullname{Your Name} for a single font.
+\name{Adrian}{Castellanos}
+\tagline{Senior Software Engineer}
+
+%% The header photo. \cvphoto declares it -- the header draws it beside the name later.
+%%   \cvphoto                          placeholder photo avatar, default diameter and inset
+%%   \cvphoto{yourphoto}               custom image, cropped to a circle
+%%   \cvphoto[4cm]                     Diameter setting
+%%   \cvphoto[4cm][0.6cm]              Diameter and inset measured from the right margin
+%% Follow \cvphoto with a blank line, or it takes a following {...} as its filename -> error.
+\cvphoto[4cm]{photo.jpg}
+
+%% Personal information in the resume header. Not all fields are required.
+%% A field prints its shown prefix ahead of the value to be self-explanatory
+%% (i.e., parser-friendly): \github{your_id} sets `github.com/your_id'
+%%
+%%   \CvInfoField[link scheme][shown prefix]{fieldname}{symbol}
+%%      \CvInfoField[https://][gitlab.com/]{gitlab}{\faGitlab}
+%%      \gitlab{your_id}            -> gitlab.com/your_id
+%%      \gitlab[noprefix]{your_id}  -> your_id, with the same link
+%%   \CvInfoField* takes the full hyperlink as a second argument
+%%      \CvInfoField*{mastodon}{\faMastodon}
+%%      \mastodon{@username@instance}{https://instance.url/@username}
+%%   \cvfieldicon{github}{\faGithubAlt} restyles a field's icon, built-ins too
+%% _ & $ ~ ^ may be written literally in a value; only # needs \#.
+%% A "$" cannot appear in a link target at all. Escaped "\$" is dropped.
+%%
+%% Fields predefined by the class:
+%% - \email, \phone, \mailaddress, \location, \homepage, \linkedin, \github, \orcid
+\CvInfoField{citizenship}{\faGlobeEurope}
+\cvpersonalinfo{%
+  \email{adrian@adriancastellanos.dev}
+  \phone{+1 310 555 0142}
+  %\mailaddress{567 Norman Street, 900 14 Los Angeles, California (CA)}
+  \location{Los Angeles, CA}
+  \citizenship{US citizenship}
+  \homepage{adriancastellanos.dev}
+  \linkedin{adrian-castellanos}
+  \github{adrian-castellanos-swe}
+  %\orcid{0000-0000-0000-0000}
+}
+
+\makecvheader
+
+\begin{cvbody}
+
+\input{contents}
+
+\end{cvbody}
+
+%% Optional bottom-right date stamp at the last document page.
+% \lastupdated
+
+\end{document}

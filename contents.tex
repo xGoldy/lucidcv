@@ -1,0 +1,209 @@
+%% Lucid CV sample content file.
+%%
+%% Author: Patrik Goldschmidt
+%% Date: 2026-10-07
+%%
+%% A software engineering resume that exercises every body macro of the class
+%% to demonstrate its capabilities. Loaded by main.tex with \input inside the
+%% cvbody environment. The same file typesets in onecolumn, twocolumn, and
+%% compressed layouts unchanged.
+%%
+%% NOTICE: All content, including the photo, is fictional and AI-generated.
+%%
+%% Body macros at a glance:
+%%   \cvsection{name}, \cvsubsection{name}       section headings (H2, H3)
+%%   \cventry[keys]{title}{side text}{date}      base entry
+%%   \begin{cvgroup}[rule] ... \end{cvgroup}     indented group of sub-entries
+%%   \cvsubentry[keys]{title}{side text}{date}   sub-entry inside a cvgroup
+%%   \cvdivider                                  dashed rule between entries
+%%   \cvtag{tag}, \cvtaglist{a, b, {c, d}}       technology chips
+%%   \cvref{name}{email}{address/affiliation}    reference entry
+%%   \cvcolumnbreak                              next column (twocolumn only)
+%%   \newpage                                    next page (current column)
+%%
+%% Entry keys: oneline, flushdate, askip, bskip, noscale (\cventry only).
+%% Empty arguments are dropped together with their | delimiter.
+
+
+%% ---- About ------------------------------------------------------------------
+%% Plain paragraph text. ATS platforms weigh the first section heavily.
+%% Body text is ragged right; the class's justify environment justifies it.
+\cvsection{About}
+
+\begin{justify}
+Senior software engineer with 8+ years of experience designing and operating distributed backend systems at scale. Specialized in \textbf{Go} and \textbf{Rust} services, Kubernetes platforms, and developer tooling. Led the migration of a payments platform to an event-driven architecture handling 40k requests per second at 99.99\% availability. Enjoys mentoring engineers, writing clear design documents, and contributing to open source, including a Rust storage engine and patches to the Go standard library. Looking for a staff-level role building reliable cloud infrastructure.
+\end{justify}
+
+
+%% ---- Experience -------------------------------------------------------------
+\cvsection{Experience}
+
+%% One-line \cventry: the date is flushed right with a dotted leader. Without
+%% oneline, the entry is stacked: side text and date go on a second line.
+%% The first entry of a section gets no gap above it. Each entry closes with a
+%% single line of \cvtaglist chips naming the technologies used.
+\cventry[oneline]{Senior Software Engineer}{Nimbravo Systems --- Los Angeles, CA}{03/2023 -- Present}
+\begin{itemize}
+  \item Lead a 6-engineer team owning the multi-region control plane for a managed Kubernetes offering that runs 2,000+ production clusters across 14 cloud regions, serving 300+ enterprise customers.
+  \item Designed a Raft-based configuration store in Go that cut cluster provisioning time from 11 to 3 minutes.
+  \item Introduced OpenTelemetry tracing across 40 services, cutting mean time to resolution (MTTR) by 35\%.
+  \item Mentored 4 engineers to promotion; ran the backend interview loop.
+\end{itemize}
+
+%% CV tag lists can be inline or on a separate line -- no implicit whitespace
+%% is thus added. Additional whitespaces need to be added manually.
+\vspace{2pt}
+\cvtaglist{Go, Kubernetes, etcd, Raft, OpenTelemetry, Prometheus, AWS, Helm, Grafana, Envoy}
+\smallskip
+
+%% One employer, several positions: a one-line \cventry for the employer,
+%% followed by a ruled cvgroup with one \cvsubentry per position.
+%% Sub-entries are one-line by default; flushdate=false keeps their dates
+%% after a bar instead of flushing them right.
+\cventry[oneline]{Lumenquay Pay}{San Francisco, CA}{06/2018 -- 02/2023}
+\begin{cvgroup}[rule]
+  \cvsubentry[flushdate=false]{Software Engineer II}{Payments Platform}{01/2021 -- 02/2023}
+  \begin{itemize}
+    \item Led the migration from a monolithic Rails checkout to Go microservices communicating over Kafka and gRPC, letting 12 product teams deploy independently and release daily instead of every two weeks.
+    \item Built an idempotent ledger service processing \$2B+ in annual volume with exactly-once semantics.
+    \item Reduced p99 checkout latency from 850\:ms to 210\:ms through request hedging and a regional read cache.
+  \end{itemize}
+
+  \smallskip
+  \cvtaglist{Go, Kafka, gRPC, PostgreSQL, Redis, Terraform, Docker, Argo CD, Vault}
+
+  %% bskip: a sub-entry has no gap below by default; the bare key adds the
+  %% same small gap a \cventry has before the paragraph that follows.
+  \cvsubentry[flushdate=false, bskip]{Software Engineer I}{Checkout Team}{06/2018 -- 12/2020}
+  Shipped the merchant-facing checkout SDK in TypeScript, adopted by 1,200+ merchants within its first year. Served as the primary on-call engineer for the checkout API and authored its incident runbooks.
+
+  \smallskip
+  \cvtaglist{TypeScript, Ruby on Rails, PostgreSQL, GitHub Actions, GraphQL, Docker, NGINX}
+\end{cvgroup}
+
+%% An explicit askip replaces the gap that a \cventry normally gets after a
+%% cvgroup.
+\cventry[oneline, askip=0.5em]{Software Engineering Intern}{Orbitrove Labs --- Remote}{06/2017 -- 09/2017}
+\begin{itemize}
+  \item Implemented a Python CLI for reproducible ML experiment tracking, later open-sourced by the company.
+\end{itemize}
+%% \cvtag sets a single chip; used here because only one technology applies.
+\cvtag{Python}
+
+
+%% ---- Projects ---------------------------------------------------------------
+%% Projects separated by dashed dividers. \href is available in every layout;
+%% links are clickable with the `hyper' class option.
+\cvsection{Open-Source Projects}
+
+\cventry[oneline]{quill-kv}{Embedded storage engine}{2022 -- Present}
+Crash-safe key-value store built on an LSM tree with lock-free memtables. 2.3k stars on GitHub, used in production by 3 companies. Source: \href{https://github.com/adrian-castellanos-swe/quill-kv}{github.com/adrian-castellanos-swe/quill-kv}
+
+\smallskip
+\cvtaglist{Rust, LSM tree, Tokio, Criterion, crossbeam, Proptest, Write-ahead logging}
+
+\cvdivider
+
+\cventry[oneline]{kubectl-pulse}{Kubernetes CLI tool}{2021}
+A \texttt{kubectl} plugin that streams live resource health of a namespace to the terminal. Accepted into the Krew plugin index, with 15k+ installs and contributions from 20 external developers.
+
+\smallskip
+\cvtaglist{Go, Kubernetes API, client-go, Cobra, Bubble Tea, Krew, GoReleaser}
+
+\cvdivider
+
+%% Empty side text: the delimiter before it disappears as well.
+\cventry[oneline]{Contributor to the Go standard library}{}{2020 -- 2022}
+Six merged patches to \texttt{net/http} and \texttt{database/sql}, including a fix for connection-pool starvation under context cancellation and a change that cut allocations in HTTP/2 header parsing by 30\%.
+
+\smallskip
+\cvtaglist{Go, net/http, database/sql, HTTP/2, pprof, Gerrit}
+
+
+%% ---- Page break -------------------------------------------------------------
+%% \newpage starts a new page (in the current column only). Here it keeps the
+%% Technical Skills heading from being stranded at the bottom of page 1 in the
+%% one-column layout; drop it for twocolumn or compressed builds.
+\newpage
+
+
+%% ---- Column break -----------------------------------------------------------
+%% In a twocolumn layout, everything below goes to the right column.
+%% In the default onecolumn layout, \cvcolumnbreak is silently ignored.
+\cvcolumnbreak
+
+
+%% ---- Skills -----------------------------------------------------------------
+%% A bold label per category followed by plain comma-separated text: the most
+%% parser-safe way to list skills. One paragraph per category.
+\cvsection{Technical Skills}
+
+\textbf{Languages:} Go, Rust, Python, TypeScript, C, C++, SQL, Bash
+
+\textbf{Infrastructure \& Tools:} Kubernetes, Docker, Terraform, AWS, GCP, PostgreSQL, Kafka, Redis, gRPC, Prometheus, GitHub Actions, Argo CD, Helm, Grafana, Envoy, Vault, NGINX, Linux
+
+\textbf{Practices:} Distributed systems, system design, observability, CI/CD, code review
+
+\textbf{Also Familiar With:} Java, Kotlin, C\#, gRPC-Web, GraphQL, Bazel, Nix, eBPF, WebAssembly
+
+
+%% ---- Education --------------------------------------------------------------
+%% A non-ruled cvgroup; oneline=false stacks the date under a sub-entry,
+%% like a stacked \cventry. Braces keep a comma inside a single chip.
+\cvsection{Education}
+
+\cventry[oneline]{University of California, Los Angeles}{Los Angeles, CA}{09/2012 -- 06/2018}
+\begin{cvgroup}
+  \cvsubentry[oneline=false]{M.S. in Computer Science}{GPA 3.9/4.0}{09/2016 -- 06/2018}
+  Thesis: \emph{Adaptive Consistency Levels for Geo-Replicated Databases}.
+
+  \smallskip
+  \cvtaglist{Distributed databases, Go, Jepsen, TLA+, Cassandra, CRDTs, Raft}
+
+  \cvsubentry[oneline=false]{B.S. in Computer Engineering}{Summa cum laude}{09/2012 -- 06/2016}
+  Teaching Assistant for Operating Systems (CS 111) for 2 semesters.
+
+  \smallskip
+  \cvtaglist{{C, C++}, Linux, x86 assembly, Verilog, GDB, Valgrind, xv6}
+\end{cvgroup}
+
+
+%% ---- Certifications ---------------------------------------------------------
+%% A compact list of one-line entries.
+\cvsection{Certifications}
+
+\cventry[oneline]{Certified Kubernetes Administrator (CKA)}{Cloud Native Computing Foundation}{2024}
+\cventry[oneline]{AWS Certified Solutions Architect -- Professional}{Amazon Web Services}{2022}
+\cventry[oneline]{HashiCorp Certified: Terraform Associate}{HashiCorp}{2021}
+
+
+%% ---- Talks & Writing --------------------------------------------------------
+%% Subsections group entries of one section. noscale sets an entry at the body
+%% text size, which suits long titles; bskip=0pt removes the gap below it.
+\cvsection{Talks \& Writing}
+
+\cvsubsection{Conference Talks}
+\cventry[oneline, noscale]{Zero-Downtime Control Plane Upgrades at Scale}{KubeCon + CloudNativeCon NA}{11/2025}
+\cventry[oneline, noscale, bskip=0pt]{Exactly-Once Payments with Kafka Transactions}{GopherCon}{07/2022}
+
+\cvsubsection{Selected Articles}
+\begin{itemize}
+  \item ``Designing Idempotent APIs,'' Lumenquay Pay engineering blog, 2.1k readers/month.
+  \item ``Lessons from 1,000 Postmortems: What Payment Outages Teach Us,'' \emph{InfoQ}, 2024.
+\end{itemize}
+
+
+%% ---- Languages --------------------------------------------------------------
+%% Entries with an empty date: only the title and side text are typeset.
+\cvsection{Languages}
+
+\cventry[oneline]{English}{Native}{}
+\cventry[oneline]{Spanish}{Professional working proficiency (C1)}{}
+
+
+%% ---- References -------------------------------------------------------------
+%% The third argument takes a mailing address or the referee's affiliation.
+\cvsection{References}
+
+\cvref{Priya Raman, Director of Engineering}{priya.raman@nimbravo.com}{Nimbravo Systems, Los Angeles, CA}
+\cvref{Marcus Whitfield, Staff Engineer}{marcus.whitfield@lumenquaypay.com}{Lumenquay Pay, San Francisco, CA}

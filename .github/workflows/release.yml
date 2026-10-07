@@ -1,0 +1,40 @@
+# Build dist/lucidcv.zip with package.sh. On a v* tag, check the tag against
+# the class version and attach the zip to a draft GitHub Release, published by
+# hand after review; a manual run only uploads the zip as a workflow artifact.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    # Full TeX Live with current updates (the class needs a 2026-06-01 format).
+    container: texlive/texlive:latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install zip and pandoc
+        run: apt-get update && apt-get install -y --no-install-recommends zip pandoc
+
+      - name: Package
+        run: ./package.sh ${{ github.ref_type == 'tag' && format('--tag {0}', github.ref_name) || '' }}
+
+      # Upload the package (zip) as is without wrapping it in a second archive
+      - uses: actions/upload-artifact@v7
+        with:
+          path: dist/lucidcv.zip
+          archive: false
+
+      - name: Attach to release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v3
+        with:
+          files: dist/lucidcv.zip
+          draft: true
