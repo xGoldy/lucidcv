@@ -605,6 +605,35 @@ Same missing-space problem, different threshold. Old pdf.js (≤2.x) does not me
 
 Current pdf.js switched to font-size-relative thresholds years ago and is not affected, but plenty of embedded viewers still ship a 2.x-era copy, VS Code's among them — hence the one-line difference of loading `.ttf` over `.otf`. **If you swap the body font, check it first**: a font is safe if and only if, after TrueType embedding, `space_advance × 0.95 > 0.3 × modal_advance` — with the mode taken over the characters a résumé actually sets, not the whole font (Inter's whole-font mode is 1.389 em, held by circled letters and geometric shapes no CV ever reaches, and screening on that would reject the font this class ships, which demonstrably works).
 
+### Why the fonts are bundled, not loaded from CTAN
+
+**TeX Live already ships all three families — `inter`, `sourcesans`, `sourcecodepro` — and the class still bundles its own copies, because the CTAN Inter fails poppler.** Switching the class over to the CTAN fonts was built and tested in full; the page looked the same and the PDF read back worse.
+
+The CTAN packages ship OpenType (CFF) builds: Inter 4.0 and Source Sans 3.052. With both loaded, poppler's default `pdftotext` mode lost **5 of 111** phrases in the default layout, and every other engine stayed intact. Swapping one family at a time isolated the cause:
+
+| Body (Inter) | Display (Source Sans) | poppler |
+| --- | --- | --- |
+| CTAN 4.0, `.otf` | bundled, `.ttf` | broken |
+| bundled 3.019, `.ttf` | CTAN 3.052, `.otf` | intact |
+
+The mechanism is Inter's units-per-em, not its shapes:
+
+1. **The OpenType Inter 4.0 is drawn on a 2048-unit grid**; Source Sans 3, like most CFF fonts, uses 1000, the unit PDF text is measured in.
+2. **LuaTeX compensates by shrinking the font size it writes, not the outlines.** For a CFF font off the 1000 grid it embeds the outlines unscaled, forces the FontMatrix to 0.001, and divides the size by units/1000 — `4.86 Tf` instead of `9.96 Tf`. The render is correct, but to anything reading the PDF, Inter body text is 4.9pt and chip text 4.4pt. This is hard-coded in LuaTeX (`pdfglyph.c`, `writecff.c`), an old workaround for an Acrobat bug, with no switch to turn it off; `Renderer=HarfBuzz` writes the same `4.86 Tf`.
+3. **poppler takes the size literally.** Its rules for joining words into lines and blocks are multiples of the font size, so an ordinary 5pt gap — about 0.5em at the real size — measures about 1em at the reported one and reads as a column gap. Each bullet and each chip became its own block, and phrases spanning them were lost.
+
+TrueType is not affected: LuaTeX rescales a `.ttf` properly whatever its grid, and the bundled Inter is on 2816 units. The problem is specifically **OpenType Inter under LuaTeX**.
+
+No clean all-CTAN alternative was found:
+
+* `\usepackage[type1]{inter}` writes the right size, but LuaLaTeX cannot put Unicode text into those 8-bit fonts: `–`, `•` and curly quotes are dropped, so `2020–2022` extracts as `20202022`.
+* Loading the package's `.pfb` files through `fontspec` fails, because the package ships no `.afm` metrics.
+* Rescaling Inter's outlines to the 1000 grid while the PDF is written was prototyped (about 45 lines of Lua on LuaTeX's `glyph_stream_provider` hook) and passed every test, but it relies on luaotfload internals that are not a public API and drops Inter's hinting. Rewriting the finished PDF in `build.sh` would not reach Overleaf or `latexmk` users. Shrinking every gap below about 4.9pt would bend the design to one extractor's bug.
+
+A mixed setup — CTAN Source Sans 3, bundled Inter — passes too, but it was rejected in favor of one consistent source: either every family comes from CTAN or none does. The regular fix belongs upstream: if the CTAN `inter` package also shipped the TrueType files that upstream Inter releases include, the class could load them with no hack and no bundling.
+
+**The bundled Inter is 3.019, not 4.0, by choice.** Inter 4.0 sets visibly darker at the same nominal weight, and the lighter 3.019 was preferred for body text. Source Sans and Source Code Pro are current releases (3.052 and 2.042).
+
 ### Icons and ToUnicode
 
 Icon fonts live in Unicode's Private Use Area (`U+E000`–`U+F8FF`), which promises never to carry a public meaning — a font and its user privately agree that, say, `U+F0E0` draws an envelope. A `ToUnicode` map for such a glyph can only assert something meaningless, so historically the PDF writer declined to write one at all. Without a map, extractors fall back to reading the raw glyph *index* as a codepoint — plausible-looking Latin letters injected into the contact line (`Ɵ your_name@email.com × 000-00-0000`) rather than an obvious unknown-character marker.
