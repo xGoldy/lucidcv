@@ -1056,6 +1056,8 @@
 %% Not hooked onto the document environment, so the header can be full width.
 \newenvironment{cvbody}{%
   \if@lcv@onecolumn\else
+  %% Set global counter for two-column mode, so tagging numbers do not repeat.
+    \globalcounter*%
     \begin{paracol}{2}%
   \fi
 }{%
@@ -1253,10 +1255,12 @@
 \newcommand{\cventryorgfont}{\lcv@lightfont\normalsize\lcv@entryscale}
 \newcommand{\cventrymetafont}{\lcv@titlefont\footnotesize\lcv@entryscale}
 
-%% Entry separator (|). The mark is in the discretionary's no-break slot, so a
-%% wrapped line drops it; `penalty 1' overrides the inherited \hyphenpenalty.
+%% Entry separator (|), in the no-break slot so a wrap drops it. `penalty 1'
+%% overrides \hyphenpenalty. The pre-break slot's zero-width space glyph keeps
+%% the wrapped lines apart for tag-order readers, as a wrap leaves no glue.
 \newcommand{\cventryseparator}{%
-  \discretionary penalty 1 {}{}{\kern0.35em\textbar\kern0.35em}%
+  \discretionary penalty 1 {\makebox[0pt][l]{\symbol{"0020}}}{}%
+    {\kern0.35em\textbar\kern0.35em}%
 }
 
 %% The separator, dropped when every field to its left is empty.

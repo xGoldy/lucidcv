@@ -303,6 +303,8 @@ The body goes inside `cvbody`, and that environment is the only place that knows
 
 Under `twocolumn` it opens `\begin{paracol}{2}`; under `onecolumn` it opens nothing. The body file is the same file either way — there is no second copy of your CV to keep in sync.
 
+**Every counter is global across the two columns.** `paracol` keeps a separate copy of each LaTeX counter per column and restores it on every column switch, and LaTeX's tagging numbers its marked content with such a counter. The right column therefore reused the left column's numbers, and its text was attached to the left column's structure elements: the PDF looked right, but the tag tree — what a screen reader follows — read two headings as "About" and left 11 empty paragraphs. `cvbody` calls `\globalcounter*` just before `\begin{paracol}`, which names no tagging internals and also covers counters a package creates later. The side effect is that counters number in source order rather than per column: lists are unaffected, since each `enumerate` restarts its own, but footnotes, figures or equations would number straight through both columns, and a `\localcounter` set in the preamble is overridden.
+
 The one thing a body file still has to say is **where the columns split**, because that is content rather than layout: `paracol` does not flow text from one column into the next the way `multicol` does. `\cvcolumnbreak` marks it, and degrades to a paragraph break under `onecolumn`:
 
 ```latex
