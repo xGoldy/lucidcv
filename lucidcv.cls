@@ -151,8 +151,11 @@
   \let\\\space
 }
 
-%% Link styling. Applied whether or not `hyper' is set.
+%% 1) Link styling. Applied whether or not `hyper' is set.
+%% 2) Show the document title in the viewer's title bar: PDF/UA 7.1-10
 \hypersetup{hidelinks}
+\hypersetup{pdfdisplaydoctitle=true}
+
 \urlstyle{same}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
