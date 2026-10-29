@@ -21,7 +21,7 @@
 # generates the list from the same main.tex and then calls this; use it unless
 # you already have both.
 #
-# Six independent checks FAIL the run:
+# Seven independent checks FAIL the run:
 #
 # src/tests/subset-glyphs.py -- word gaps are real space characters, not positioning
 #                     instructions. A property of the PDF LuaLaTeX guarantees.
@@ -36,6 +36,9 @@
 # src/tests/metadata-check.py -- the title, author, subject and keywords reached
 #                  the XMP packet, not only the Info dict. In twocolumn the
 #                  last page once shipped before the class had set them.
+# src/tests/hidden-text-check.py -- no text a reader cannot see: invisible,
+#                  near-white, transparent, tiny, off-page, stacked or under
+#                  an image. Screening tools read that as keyword stuffing.
 # src/tests/order.py -- how much of each engine's output arrives in document ORDER.
 #             check.py tests only whether a phrase is present; a CV whose
 #             Education dates come back after References is still mis-filed.
@@ -51,7 +54,7 @@
 #                         E.g., java.util.regex \s does not match U+00A0
 #                         so PDFBox/Tika-based ATSs will not split on it.
 #
-# Exits non-zero if any of the six fails. Which engines each variant excuses is
+# Exits non-zero if any of the seven fails. Which engines each variant excuses is
 # COVERAGE_ADVISORY and ORDER_ADVISORY in src/common.py.
 set -euo pipefail
 
@@ -128,6 +131,10 @@ echo "=== PDF/A-2B conformance ==="
 echo
 echo "=== XMP metadata ==="
 "$PY" "$HERE/src/tests/metadata-check.py" "$PDF" || status=1
+
+echo
+echo "=== hidden text ==="
+"$PY" "$HERE/src/tests/hidden-text-check.py" "$PDF" || status=1
 
 echo
 echo "=== text extraction ==="

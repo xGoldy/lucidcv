@@ -107,11 +107,11 @@ them through it, so a check added to `run.sh` is picked up without an edit.
 
 ## What is checked
 
-Six checks fail the run, in the order `run.sh` runs them. A seventh reports.
+Seven checks fail the run, in the order `run.sh` runs them. An eighth reports.
 
-A check that cannot run on this machine — `subset-glyphs.py`, `icon-check.py`
-and `metadata-check.py` need PyMuPDF from `env/python` — prints `SKIP:` instead
-of a verdict. The run
+A check that cannot run on this machine — `subset-glyphs.py`, `icon-check.py`,
+`metadata-check.py` and `hidden-text-check.py` need PyMuPDF from `env/python` —
+prints `SKIP:` instead of a verdict. The run
 does not fail on it, but `pipeline.json` records the gate as `skipped` and the
 summary line names it, so a missing dependency never passes for a clean result.
 `pdfa-check.py` runs without PyMuPDF and skips only its font-embedding check.
@@ -247,6 +247,45 @@ It checks properties of any build, not values copied from `main.tex`:
 
 It fails the `twocolumn` build from before the fix on all four fields, and a
 build with `pdfdisplaydoctitle` dropped from the class on the last check.
+
+### `src/tests/hidden-text-check.py` — no text a reader cannot see
+
+Hidden text is how keyword stuffing is done — white words on a white page, 2pt
+type, text pushed off the page or stacked under other text — and screening
+tools that look for it flag the whole document, not just the words. The class
+does put invisible glyphs into the PDF, but only whitespace: tagging turns every
+word gap into a real U+0020, the header carries U+00A0s, and the entry separator
+gets tagpdf's `\pdffakespace` on each side. This check keeps it that way —
+whitespace may be invisible, nothing else may:
+
+```text
+  characters             5911, 730 of them whitespace (allowed to be invisible)
+  faintest text          1.51:1 against white (limit 1.25:1)
+  invisible              none
+  faint                  none
+  transparent            none
+  tiny                   none
+  off-page               none
+  stacked                none
+  under an image         none
+```
+
+It fails on any character other than whitespace that is drawn in render mode 3
+(invisible), in a colour under 1.25:1 contrast against white, at under 0.25
+opacity, under 4pt, with its origin off the page, over more than half of another
+visible glyph, or inside the visible area of an image. The limits sit well
+below the class's own extremes: its faintest text is the date leader's light
+grey dots at 1.51:1, and its smallest is 8pt.
+
+An image's visible area is its placement cut to the smallest clip lying mostly
+on it, because the header photo is a rectangle clipped to a circle, and in
+`twocolumn` + `compressed` the right column's first heading sits under the
+hidden part of that rectangle. PyMuPDF reports a clip by its bounding box, so a
+circle counts as its square. Text hidden by a clipping path, or under a vector
+shape filled after it, is not detected; the class draws neither over text.
+
+A test document carrying one of each trick beside a clean control line fails on
+all seven, with exactly the hidden characters counted and none of the control.
 
 ### `src/tests/check.py` — did the phrase survive at all
 
@@ -506,11 +545,12 @@ tests/
     init-phrases.py         reads the .tex and writes the phrase list
     pipeline.py             the four stages for one MAIN; run.sh does the
                             checking, this decides what it is handed
-    tests/                  one file per check; run.sh runs all seven in order
+    tests/                  one file per check; run.sh runs all eight in order
       subset-glyphs.py      word gaps are real space characters
       icon-check.py         icon glyphs extract as U+0020
       pdfa-check.py         the PDF/A-2B claim holds; veraPDF decides when installed
       metadata-check.py     title, author, subject, keywords reached the XMP
+      hidden-text-check.py  no invisible text other than whitespace
       check.py              coverage — did the phrase survive, strict vs advisory
       order.py              reading order — did it survive *in sequence*; body
                             strict, header reported only

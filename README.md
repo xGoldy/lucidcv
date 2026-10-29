@@ -360,9 +360,11 @@ The test pipeline takes one `.tex` file, extracts the expected visible phrases f
 1. **Real word spaces:** Every gap between words is stored as an actual space character in the PDF, so extractors do not have to infer word boundaries from horizontal positioning.
 2. **Icons as whitespace:** Icons extract as plain whitespace, never as random letters or icon names.
 3. **PDF/A-2b conformance:** The PDF is validated with veraPDF (if installed), since a PDF/A claim in the file's metadata does not guarantee actual conformance.
-4. **Text extraction:** Every expected phrase is found in the text.
-5. **Reading order:** The extracted phrases appear in the same order as in the document, ensuring that dates remain associated with their entries and that columns do not interleave.
-6. **Word-gap characters** (report only, never fails): The whitespace character returned between words by each extraction configuration is recorded, since some parsers do not treat non-breaking spaces as regular whitespace.
+4. **XMP metadata:** The title, author, subject, and keywords are stored in the PDF's XMP metadata.
+5. **No hidden text:** Apart from whitespace, every character in the PDF is visible: none is invisible, near-white, nearly transparent, smaller than 4 pt, off the page, stacked on other text, or behind an image. Screening tools may treat hidden text as keyword stuffing and flag the whole document.
+6. **Text extraction:** Every expected phrase is found in the text.
+7. **Reading order:** The extracted phrases appear in the same order as in the document, ensuring that dates remain associated with their entries and that columns do not interleave.
+8. **Word-gap characters** (report only, never fails): The whitespace character returned between words by each extraction configuration is recorded, since some parsers do not treat non-breaking spaces as regular whitespace.
 
 ### Results
 
