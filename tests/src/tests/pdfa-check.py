@@ -2,9 +2,9 @@
 """Verify the built PDF really is the PDF/A-2B it says it is.
 
 Author: Patrik Goldschmidt
-Date: 2026-08-28, last rev. 2026-10-04
+Date: 2026-08-28, last rev. 2026-10-29
 
-`main.tex` opens with \\DocumentMetadata{pdfstandard=A-2b,tagging=on}, and that
+`main.tex` opens with \\DocumentMetadata{pdfstandard={A-2b,UA-1},...}, and that
 line is a CLAIM, not a guarantee: the engine stamps the PDF/A identification
 into the XMP whether or not the file that comes out actually conforms. It warns
 when it notices a breach --
@@ -45,19 +45,15 @@ or if it does not carry the PDF/A identification at all. run.sh calls it as
     pdfa-check.py PDF
 """
 
-import os
 import pathlib
 import re
-import shutil
-import subprocess
 import sys
-import zlib
 
 # src/ is one directory up: these run as scripts, so the shared module is not
 # on the path unless we put it there.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from common import ENV_DIR
+from common import find_verapdf, raw_objects, verapdf_verdict
 
 
 # What the XMP has to say for this document to be claiming PDF/A-2B.
@@ -72,23 +68,6 @@ PDF_SUBTYPES = ("application/pdf",)
 # Actions PDF/A forbids outright.
 FORBIDDEN_ACTIONS = ("/JavaScript", "/Launch", "/Movie", "/Sound", "/ResetForm",
                      "/ImportData")
-
-
-def raw_objects(data):
-    """The file's bytes plus every stream we can inflate, as one blob.
-
-    Object streams keep most of the structure compressed, so a plain scan of
-    the file misses the catalog, the Filespec dictionaries and the XMP packet.
-    """
-    blobs = [data]
-
-    for match in re.finditer(rb"stream\r?\n(.*?)endstream", data, re.S):
-        try:
-            blobs.append(zlib.decompress(match.group(1)))
-        except zlib.error:
-            pass
-
-    return b"\n".join(blobs)
 
 
 def pdfa_identification(blob):
@@ -165,51 +144,6 @@ def unembedded_fonts(path):
         return missing, doc.is_encrypted
 
 
-# Where veraPDF may be found, most explicit first. setup.sh installs into
-# env/verapdf/vendor/; VERAPDF overrides when it was put somewhere else,
-# which is what a full root filesystem forces.
-def find_verapdf():
-    env = os.environ.get("VERAPDF")
-
-    if env and pathlib.Path(env).is_file() and os.access(env, os.X_OK):
-        return env
-
-    local = ENV_DIR / "verapdf" / "vendor" / "verapdf"
-
-    if local.is_file() and os.access(local, os.X_OK):
-        return str(local)
-
-    return shutil.which("verapdf") or None
-
-
-def verapdf_verdict(exe, pdf, flavour="2b"):
-    """(passed, detail) from the reference validator, or (None, why-not).
-
-    One run of the default XML report carries both the verdict and, on a
-    failure, the ISO clause behind each failed rule.
-    """
-    try:
-        r = subprocess.run([exe, "-f", flavour, str(pdf)],
-                           capture_output=True, text=True, timeout=300)
-    except (OSError, subprocess.SubprocessError) as e:
-        return None, f"could not run veraPDF: {e}"
-
-    verdict = re.search(r'isCompliant="(true|false)"', r.stdout)
-
-    if not verdict:
-        head = (r.stderr or r.stdout).strip().split("\n")[0]
-        return None, head or "veraPDF produced no verdict"
-
-    if verdict.group(1) == "true":
-        return True, ""
-
-    rules = re.findall(r'clause="([^"]+)"\s+testNumber="([^"]+)"', r.stdout)
-    detail = "; ".join(f"ISO 19005-2 clause {c} test {t}"
-                       for c, t in dict.fromkeys(rules))
-
-    return False, detail or "non-compliant, no rule named"
-
-
 def main(path):
     pdf = pathlib.Path(path)
     print(f"pdfa-check.py: {pdf}\n")
@@ -224,7 +158,7 @@ def main(path):
         print("  PDF/A identification   MISSING")
         print("\nFAIL: the PDF carries no pdfaid metadata, so it does not claim\n"
               "      PDF/A at all. Check that main.tex still opens with\n"
-              "      \\DocumentMetadata{pdfstandard=A-2b,tagging=on}.")
+              "      \\DocumentMetadata{pdfstandard={A-2b,UA-1},tagging=on}.")
         return 1
 
     claim = f"PDF/A-{part}{conformance}"
@@ -297,7 +231,7 @@ def main(path):
     if exe is None:
         print("  veraPDF                not installed -- run tests/setup.sh")
     else:
-        passed, detail = verapdf_verdict(exe, pdf)
+        passed, detail = verapdf_verdict(exe, pdf, "2b")
 
         if passed is True:
             print(f"  veraPDF                PASS  (PDF/A-{WANT_PART}{WANT_CONFORMANCE})")

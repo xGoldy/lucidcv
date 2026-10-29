@@ -8,14 +8,19 @@ they have to agree on which engines exist and in what order they are reported,
 which of them each variant excuses, how a phrase is folded before it is
 matched, where a phrase is found in an extraction, and how the phrase file is
 parsed. All of that lives here, so neither scorer imports the other.
+pdfa-check.py and pdfua-check.py share the raw-object scan and the veraPDF run.
 
 Not a script -- there is nothing to run here.
 """
 
 import collections
+import os
 import pathlib
 import re
+import shutil
+import subprocess
 import unicodedata
+import zlib
 
 SRC_DIR = pathlib.Path(__file__).resolve().parent
 TESTS_DIR = SRC_DIR.parent
@@ -171,3 +176,67 @@ def load_phrases(path):
             (header if group == HEADER_GROUP else body).append(line)
 
     return Phrases(every, header, body)
+
+
+def raw_objects(data):
+    """The file's bytes plus every stream we can inflate, as one blob.
+
+    Object streams keep most of the structure compressed, so a plain scan of
+    the file misses the catalog, the Filespec dictionaries and the XMP packet.
+    """
+    blobs = [data]
+
+    for match in re.finditer(rb"stream\r?\n(.*?)endstream", data, re.S):
+        try:
+            blobs.append(zlib.decompress(match.group(1)))
+        except zlib.error:
+            pass
+
+    return b"\n".join(blobs)
+
+
+# Where veraPDF may be found, most explicit first. setup.sh installs into
+# env/verapdf/vendor/; VERAPDF overrides when it was put somewhere else,
+# which is what a full root filesystem forces.
+def find_verapdf():
+    env = os.environ.get("VERAPDF")
+
+    if env and pathlib.Path(env).is_file() and os.access(env, os.X_OK):
+        return env
+
+    local = ENV_DIR / "verapdf" / "vendor" / "verapdf"
+
+    if local.is_file() and os.access(local, os.X_OK):
+        return str(local)
+
+    return shutil.which("verapdf") or None
+
+
+def verapdf_verdict(exe, pdf, flavour):
+    """(passed, detail) from the reference validator, or (None, why-not).
+
+    `flavour' is veraPDF's profile name: `2b' for PDF/A-2B, `ua1' for PDF/UA-1.
+    One run of the default XML report carries both the verdict and, on a
+    failure, the standard and clause behind each failed rule.
+    """
+    try:
+        r = subprocess.run([exe, "-f", flavour, str(pdf)],
+                           capture_output=True, text=True, timeout=300)
+    except (OSError, subprocess.SubprocessError) as e:
+        return None, f"could not run veraPDF: {e}"
+
+    verdict = re.search(r'isCompliant="(true|false)"', r.stdout)
+
+    if not verdict:
+        head = (r.stderr or r.stdout).strip().split("\n")[0]
+        return None, head or "veraPDF produced no verdict"
+
+    if verdict.group(1) == "true":
+        return True, ""
+
+    rules = re.findall(r'specification="([^":]+)[^"]*"\s+clause="([^"]+)"'
+                       r'\s+testNumber="([^"]+)"', r.stdout)
+    detail = "; ".join(f"{s} clause {c} test {t}"
+                       for s, c, t in dict.fromkeys(rules))
+
+    return False, detail or "non-compliant, no rule named"

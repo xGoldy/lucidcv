@@ -301,8 +301,9 @@ install_java() {
 }
 
 # ---- 5. veraPDF -------------------------------------------------------------
-# pdfa-check.py works without this: it tests the conformance rules this document
-# can plausibly break, and that is what runs when veraPDF is absent. What
+# pdfa-check.py and pdfua-check.py work without this: they test the conformance
+# rules this document can plausibly break, and that is what runs when veraPDF
+# is absent. What
 # veraPDF adds is authority -- it is the validator the PDF/A standard's own test
 # corpus is maintained against, so it decides the question rather than
 # approximating it, and it reports the ISO clause behind a failure:

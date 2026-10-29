@@ -4,6 +4,7 @@
 [![Version](https://img.shields.io/github/v/release/xGoldy/lucidcv?label=version&color=blue)](https://github.com/xGoldy/lucidcv/releases/latest)
 ![License](https://img.shields.io/badge/license-LPPL%201.3c-green)
 ![PDF/A-2b](https://img.shields.io/badge/PDF%2FA-2b-red)
+![PDF/UA-1](https://img.shields.io/badge/PDF%2FUA-1-purple)
 ![Tagged PDF](https://img.shields.io/badge/PDF-tagged-orange)
 ![Tests](https://img.shields.io/badge/tests-passing-brightgreen)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-support-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/Z6Q8280XSJ)
@@ -39,7 +40,7 @@ This README covers the class's features, setup, usage, and ATS-compatibility tes
 ## 1. Features
 
 - **Modern, clean design.** Inspired by [PlushCV](https://github.com/cystema/PlushCV) with bundled Inter, Source Sans 3 and Source Code Pro fonts, a single accent color driving the palette, section heading rules, and Font Awesome 5 icons in the contact line. These choices aim to remain visually appealing without compromising machine readability (see [ATS Compatibility as a Design Priority](#ats-compatibility-as-a-design-priority)).
-- **PDF/A-2b and tagged PDF.** The output conforms to the PDF/A-2b standard for long-term archiving and includes a tagged document structure: headings use `H2`/`H3`, the photo is a `Figure` with alternative text, while the title, author, and subject are populated automatically from the header. This improves interoperability with PDF readers, parsers, and other applications.
+- **PDF/A-2b, PDF/UA-1 and tagged PDF.** The output conforms to the PDF/A-2b standard for long-term archiving and to the PDF/UA-1 standard for accessibility, and includes a tagged document structure: headings use `H2`/`H3`, the photo is a `Figure` with alternative text, links carry a description, decorative rules and leaders are marked as artifacts. Title, author, and subject are populated automatically from the header. This improves interoperability with PDF readers, screen readers, and parserss.
 - **Customizable without touching the class.** Accent color in any color model, margins, column ratio, font sizes, and the spacing between items, entries, and sections can all be configured from the preamble (see [Preamble](#preamble)).
 - **One content file, multiple layouts.** The same body can be typeset in one or two columns, and at regular or compressed density, by changing class options only. Column breaks are safely ignored in the single-column layout, so there is no need to maintain separate versions of the content.
 - **Header with contact fields and photo.** Predefined contact fields (email, phone, address, location, homepage, LinkedIn, GitHub, ORCID) display their full service prefix (e.g., `github.com/xGoldy`) and can be turned into clickable links. Custom fields with icons can also be declared. A circular photo can be added to the header and enabled or disabled with a single class option.
@@ -168,13 +169,15 @@ Class-specific options include:
 In every document using Lucid CV class, two additional commands should be placed at the very top of `main.tex` before the `\documentclass` command:
 
 ```latex
-\DocumentMetadata{pdfstandard=A-2b,tagging=on,lang=en-US}
+\DocumentMetadata{pdfstandard={A-2b,UA-1},tagging=on,lang=en-US}
 \tagpdfsetup{math/mathml/luamml/load=false}
 
 \documentclass[10pt,a4paper,hyper,photo,onecolumn]{lucidcv}
 ```
 
-`\DocumentMetadata` configures the document for PDF/A-2b, enables PDF tagging, and sets the PDF language to US English. For a CV written in another language, change `lang` accordingly. PDF/A provides a standardized, self-contained document format intended for long-term preservation, while PDF tagging provides a semantic structure that can improve accessibility and machine processing. Together, these features contribute to robust PDF parsing and ATS compatibility.
+`\DocumentMetadata` configures the document for PDF/A-2b and PDF/UA-1, enables PDF tagging, and sets the PDF language to US English. For a CV written in another language, change `lang` accordingly. PDF/A provides a standardized, self-contained document format intended for long-term preservation, PDF/UA makes the document accessible to screen readers, and PDF tagging provides the semantic structure both rely on. Together, these features contribute to robust PDF parsing and ATS compatibility.
+
+**The PDF/UA-1 claim covers what the class produces.** Anything you add yourself has to meet the standard too: an image or TikZ drawing placed in the body needs alternative text (e.g., TikZ's `alt` key), or the PDF claims PDF/UA-1 without conforming.
 
 The `\tagpdfsetup` command disables the math-tagging module. Since a CV should normally contain no mathematical content, this has no effect on the final output; it only suppresses a warning that would otherwise be produced. If you need unicode-math to map mathematical content to PDF tags, comment out or remove this line.
 
@@ -313,7 +316,7 @@ The class raises the following warnings and one error:
 | Condition | Type | Why it is reported |
 | --- | --- | --- |
 | Not compiled with LuaLaTeX | Error | Nothing else in the class can work. |
-| No `\DocumentMetadata` line at the top of the file | Warning | The PDF looks identical, but it is neither PDF/A nor tagged and does not contain real spaces between words. |
+| No `\DocumentMetadata` line at the top of the file | Warning | The PDF looks identical, but it is neither PDF/A nor PDF/UA, is not tagged, and does not contain real spaces between words. |
 | `\nametaggap` too small (below roughly -6pt) | Warning | The header looks fine, but some parsers might merge the name and tagline into a single line. |
 | A `\CvInfoField` scheme ending in neither `:` nor `//` | Warning | The printed text is correct, but the link target is broken. |
 | `\setcolumnwidth` used instead of `\columnratio` | Warning | No column ratio can be read, so the header falls back to `0.65`. |
@@ -360,11 +363,12 @@ The test pipeline takes one `.tex` file, extracts the expected visible phrases f
 1. **Real word spaces:** Every gap between words is stored as an actual space character in the PDF, so extractors do not have to infer word boundaries from horizontal positioning.
 2. **Icons as whitespace:** Icons extract as plain whitespace, never as random letters or icon names.
 3. **PDF/A-2b conformance:** The PDF is validated with veraPDF (if installed), since a PDF/A claim in the file's metadata does not guarantee actual conformance.
-4. **XMP metadata:** The title, author, subject, and keywords are stored in the PDF's XMP metadata.
-5. **No hidden text:** Apart from whitespace, every character in the PDF is visible: none is invisible, near-white, nearly transparent, smaller than 4 pt, off the page, stacked on other text, or behind an image. Screening tools may treat hidden text as keyword stuffing and flag the whole document.
-6. **Text extraction:** Every expected phrase is found in the text.
-7. **Reading order:** The extracted phrases appear in the same order as in the document, ensuring that dates remain associated with their entries and that columns do not interleave.
-8. **Word-gap characters** (report only, never fails): The whitespace character returned between words by each extraction configuration is recorded, since some parsers do not treat non-breaking spaces as regular whitespace.
+4. **PDF/UA-1 conformance:** The PDF is tagged, its links carry descriptions, and its figures carry alternative text; veraPDF (if installed) validates the whole machine-checkable part of PDF/UA-1.
+5. **XMP metadata:** The title, author, subject, and keywords are stored in the PDF's XMP metadata.
+6. **No hidden text:** Apart from whitespace, every character in the PDF is visible: none is invisible, near-white, nearly transparent, smaller than 4 pt, off the page, stacked on other text, or behind an image. Screening tools may treat hidden text as keyword stuffing and flag the whole document.
+7. **Text extraction:** Every expected phrase is found in the text.
+8. **Reading order:** The extracted phrases appear in the same order as in the document, ensuring that dates remain associated with their entries and that columns do not interleave.
+9. **Word-gap characters** (report only, never fails): The whitespace character returned between words by each extraction configuration is recorded, since some parsers do not treat non-breaking spaces as regular whitespace.
 
 ### Results
 
@@ -395,7 +399,7 @@ These results do not constitute a guarantee of compatibility with every ATS. How
 
 If you wish to run the PDF extraction tests yourself, the `pipeline.sh` script provides an end-to-end way to run the full test suite. First, set up the test environment with `setup.sh`. This script installs the required tools in two groups: system packages (Poppler, Ghostscript, Tesseract, and a Java runtime), installed through `apt-get` or `dnf` and requiring root privileges; and local dependencies (Python, pdf.js, PDFBox, Tika, and veraPDF), installed under `tests/env/` without root access.
 
-With `--no-system`, the system packages are skipped. Tests that depend on them are reported as _not run_ rather than failing. This leaves 5 of the 13 configurations available (`mupdf`, `pdfium`, `pdfminer`, `pdfjs-old`, and `pdfjs-new`), while the PDF/A check falls back to its built-in approximation.
+With `--no-system`, the system packages are skipped. Tests that depend on them are reported as _not run_ rather than failing. This leaves 5 of the 13 configurations available (`mupdf`, `pdfium`, `pdfminer`, `pdfjs-old`, and `pdfjs-new`), while the PDF/A and PDF/UA checks fall back to their built-in approximations.
 
 The TeX toolchain is not installed by the test setup script. The same LuaLaTeX environment used to build the class (see [Local Compilation (Linux)](#local-compilation-linux)) is required.
 

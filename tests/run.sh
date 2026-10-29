@@ -21,7 +21,7 @@
 # generates the list from the same main.tex and then calls this; use it unless
 # you already have both.
 #
-# Seven independent checks FAIL the run:
+# Eight independent checks FAIL the run:
 #
 # src/tests/subset-glyphs.py -- word gaps are real space characters, not positioning
 #                     instructions. A property of the PDF LuaLaTeX guarantees.
@@ -33,6 +33,10 @@
 #                  stamps the claim in either way, and the engine's complaint
 #                  goes only to a .log that ../build.sh deletes.
 #                  Defers to veraPDF when ./setup.sh has installed it.
+# src/tests/pdfua-check.py -- the PDF is the PDF/UA-1 it advertises: tagged,
+#                  links described, figures with alt text. Without the claim
+#                  the links lose their /Contents, so a missing one fails.
+#                  Defers to veraPDF the same way.
 # src/tests/metadata-check.py -- the title, author, subject and keywords reached
 #                  the XMP packet, not only the Info dict. In twocolumn the
 #                  last page once shipped before the class had set them.
@@ -54,7 +58,7 @@
 #                         E.g., java.util.regex \s does not match U+00A0
 #                         so PDFBox/Tika-based ATSs will not split on it.
 #
-# Exits non-zero if any of the seven fails. Which engines each variant excuses is
+# Exits non-zero if any of the eight fails. Which engines each variant excuses is
 # COVERAGE_ADVISORY and ORDER_ADVISORY in src/common.py.
 set -euo pipefail
 
@@ -127,6 +131,10 @@ echo "=== icons extract as whitespace ==="
 echo
 echo "=== PDF/A-2B conformance ==="
 "$PY" "$HERE/src/tests/pdfa-check.py" "$PDF" || status=1
+
+echo
+echo "=== PDF/UA-1 conformance ==="
+"$PY" "$HERE/src/tests/pdfua-check.py" "$PDF" || status=1
 
 echo
 echo "=== XMP metadata ==="

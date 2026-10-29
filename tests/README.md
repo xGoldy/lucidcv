@@ -2,8 +2,8 @@
 
 Checks that a PDF built with the template in `../` still reads back the way a
 resume has to: every phrase intact, in the right order, with real spaces between
-the words, icons that extract as nothing, and a PDF/A claim the file actually
-honors.
+the words, icons that extract as nothing, and PDF/A and PDF/UA claims the file
+actually honors.
 
 ```sh
 ./setup.sh                    # once: builds env/ -- see Dependencies below
@@ -107,14 +107,15 @@ them through it, so a check added to `run.sh` is picked up without an edit.
 
 ## What is checked
 
-Seven checks fail the run, in the order `run.sh` runs them. An eighth reports.
+Eight checks fail the run, in the order `run.sh` runs them. A ninth reports.
 
 A check that cannot run on this machine — `subset-glyphs.py`, `icon-check.py`,
 `metadata-check.py` and `hidden-text-check.py` need PyMuPDF from `env/python` —
 prints `SKIP:` instead of a verdict. The run
 does not fail on it, but `pipeline.json` records the gate as `skipped` and the
 summary line names it, so a missing dependency never passes for a clean result.
-`pdfa-check.py` runs without PyMuPDF and skips only its font-embedding check.
+`pdfa-check.py` runs without PyMuPDF and skips only its font-embedding check;
+`pdfua-check.py` skips its structure checks and leaves the verdict to veraPDF.
 
 ### `src/tests/subset-glyphs.py` — real word spaces
 
@@ -159,7 +160,7 @@ never whether anything else crept in.
 
 ### `src/tests/pdfa-check.py` — the PDF really is PDF/A-2B
 
-`\DocumentMetadata{pdfstandard=A-2b}` stamps the PDF/A identification into the
+`\DocumentMetadata{pdfstandard={A-2b,UA-1}}` stamps the PDF/A identification into the
 XMP whether or not the file that comes out conforms, so the claim needs checking
 independently of itself. The engine does notice a breach —
 
@@ -208,6 +209,44 @@ filesystem can force, run `setup.sh` with `VERAPDF_PREFIX=<dir>`.
 `PATH`, so set `VERAPDF=<dir>/verapdf` (the executable, not the folder) when
 you run the suite. Without veraPDF the built-in checks still run and still fail
 the build — they just cannot cite chapter and verse, and the run says so.
+
+### `src/tests/pdfua-check.py` — the PDF really is PDF/UA-1
+
+The same claim problem, for accessibility: `UA-1` in `pdfstandard` writes the
+`pdfuaid` identification whether or not the tags behind it hold up, and screen
+readers and accessibility checkers trust the tags. The claim also does work of
+its own. Only with `UA-1` declared does LaTeX give each link annotation the
+`/Contents` description PDF/UA-1 7.18.5 requires — the A-2b-only build failed
+veraPDF on exactly that, on all six contact links. So a missing claim fails
+here instead of being skipped: dropping it from `main.tex` loses the
+descriptions along with the identification.
+
+It checks the rules this document can plausibly break — the `pdfuaid` part,
+`/MarkInfo /Marked true` and a structure tree, `/Tabs /S` on every page, every
+annotation tagged and carrying `/Contents`, and every `Figure` (after the role
+map) with alternative text. The title, `/DisplayDocTitle` and language are
+`metadata-check.py`'s. veraPDF then runs with its PDF/UA-1 profile, which covers
+every machine-checkable rule of ISO 14289-1:
+
+```text
+  PDF/UA identification  PDF/UA-1
+  tagged                 ok
+  tab order /S           ok
+  annotations            6, 0 problems
+  figures                1, 0 without alt text
+  veraPDF                PASS  (PDF/UA-1)
+```
+
+The sample passes in every variant the suite builds, and each class option
+passes veraPDF on its own. The sample with the link descriptions and the
+photo's alt text stripped fails both, veraPDF naming clauses 7.18.5, 7.18.1
+and 7.3.
+
+**What no machine decides** stays a human review: whether alt text describes
+its image, whether the heading levels make sense, whether the reading order is
+the visual one. The last is what `order.py` scores for the extractors. A
+Figure added to the CV without alt text is the likeliest way to break the
+claim; the class gives `\cvphoto` one from `\name`.
 
 ### `src/tests/metadata-check.py` — the metadata reached the XMP
 
@@ -540,15 +579,18 @@ tests/
     common.py               what the checks must agree on: the engine list,
                             the variants and both advisory tables, norm(),
                             locate(), the phrase-file parser and the
-                            extraction reader, plus the out/ and env/ paths
+                            extraction reader, plus the out/ and env/ paths,
+                            and the raw-object scan and veraPDF run the two
+                            conformance checks share
     extract.py              runs every engine on one PDF -> out/<label>/<engine>.txt
     init-phrases.py         reads the .tex and writes the phrase list
     pipeline.py             the four stages for one MAIN; run.sh does the
                             checking, this decides what it is handed
-    tests/                  one file per check; run.sh runs all eight in order
+    tests/                  one file per check; run.sh runs all nine in order
       subset-glyphs.py      word gaps are real space characters
       icon-check.py         icon glyphs extract as U+0020
       pdfa-check.py         the PDF/A-2B claim holds; veraPDF decides when installed
+      pdfua-check.py        the PDF/UA-1 claim holds; veraPDF decides when installed
       metadata-check.py     title, author, subject, keywords reached the XMP
       hidden-text-check.py  no invisible text other than whitespace
       check.py              coverage — did the phrase survive, strict vs advisory
@@ -685,7 +727,7 @@ pipeline, where every advisory score was different.
 | venv | `env/python/`, with PyMuPDF, pypdfium2 and pdfminer.six pip-installed into it | no |
 | pdfjs | a Node runtime, both pdf.js builds, and the two driver scripts | no |
 | java | the PDFBox and Tika jars | no |
-| verapdf | the reference PDF/A validator | no |
+| verapdf | the reference PDF/A and PDF/UA validator | no |
 
 Every stage is idempotent — it skips what is already there — and every stage is
 optional. Skip one and the engines it provides report as *not run* rather than

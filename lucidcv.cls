@@ -97,8 +97,8 @@
   }{%
     \ClassWarning{lucidcv}{%
       No \string\DocumentMetadata\space seen, so this PDF has neither PDF/A\MessageBreak
-      metadata nor real word spaces between words. Put\MessageBreak
-      \string\DocumentMetadata{pdfstandard=A-2b,tagging=on,lang=en-US}\MessageBreak
+      nor PDF/UA metadata, nor real word spaces between words. Put\MessageBreak
+      \string\DocumentMetadata{pdfstandard={A-2b,UA-1},tagging=on,lang=en-US}\MessageBreak
       as the FIRST line of your .tex, before \string\documentclass}%
   }%
 }
