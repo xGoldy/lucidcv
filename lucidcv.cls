@@ -287,6 +287,16 @@
   \endgroup
 }
 
+%% Decoration (rules, dividers) is not content, but an artifact.
+%% #1 = the decorative paragraph itself, ending in its own \par
+\newcommand{\lcv@artifactpar}[1]{%
+  \begingroup
+    \if@lcv@tagging\tagpdfparaOff\tagmcbegin{artifact}\fi
+    #1%
+    \if@lcv@tagging\tagmcend\fi
+  \endgroup
+}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Real spaces at thin spaces
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -341,7 +351,7 @@
   \par\removelastskip
   \vskip\cvdividerskip
   \nointerlineskip
-  {\parskip=0pt\noindent
+  \lcv@artifactpar{\parskip=0pt\noindent
    {\color{divider}\hdashrule{\linewidth}{\cvdividerwidth}{\cvdividerdash}}\par}%
   \vskip\cvdividerskip
   \nointerlineskip
@@ -684,17 +694,17 @@
 \cs_new:Npn \lcv@purify #1 { \text_purify:n {#1} }
 \ExplSyntaxOff
 
-%% Tag a drawing as a Figure carrying alt text.
-%% Args: #1 = alt text, #2 = the drawing
+%% Tag a tikz drawing as a Figure with alt text via tikz's `alt' key (holds the
+%% ink); paragraph tagging stays off through \par, so no empty `text' opens.
+%% Args: #1 = alt text, #2 = the drawing, a single tikz picture
 \newcommand{\lcv@tagfigure}[2]{%
-  \if@lcv@tagging
-    \expanded{\noexpand\tagstructbegin{tag=Figure,alt={\lcv@purify{#1}}}}%
-    \tagmcbegin{tag=Figure}%
-    #2%
-    \tagmcend\tagstructend
-  \else
-    #2%
-  \fi
+  \begingroup
+    \if@lcv@tagging
+      \tagpdfparaOff
+      \expanded{\noexpand\tikzset{alt={\lcv@purify{#1}}}}%
+    \fi
+    #2\par
+  \endgroup
 }
 
 %% Photo drawing: Create a minipage and a circle with its diameter, and fill it
@@ -991,6 +1001,9 @@
       \addtolength{\lcv@nameblockwidth}
         {-\dimexpr\lcv@photodiam+\cvphotogutter+\lcv@photoinset\relax}%
     \fi
+    %% A line of only boxes tags as empty `text' around them: turn tagging is
+    %% off here, back on inside each minipage, and restored by \endgroup.
+    \if@lcv@tagging\tagpdfparaOff\fi
     \begin{minipage}{\lcv@nameblockwidth}%
     \raggedright%
     %% Hacky fix -- part 2 of 2; part 1 is \lcv@headerbreak above. Two more
@@ -1009,9 +1022,11 @@
       {\taglinefont\color{tagline}\lcv@headerbreak\lcv@tagline\par}%
       \vspace{\cvheaderskip}\vspace{\tagcontactgap}%
     }%
-    %% The contact block, held to \cvinfowidth
+    %% The contact block, held to \cvinfowidth. Its line is only the minipage,
+    %% so it gets no paragraph tagging either -- the same as above.
     {\personalinfofont
      \@lcv@ininfotrue \global\@lcv@infoseenfalse
+     \if@lcv@tagging\tagpdfparaOff\fi
      \begin{minipage}[t]{\cvinfowidth}\raggedright\lcv@personalinfo\par\end{minipage}\par}%
     \end{minipage}%
     \hfill%
@@ -1157,7 +1172,7 @@
   \lcv@taggedpar{H2}{\color{heading}\cvsectionfont #1\par}%
   \if@lcv@rule
     \vspace{-0.7ex}\vspace{-\cvrulegaptrim}%
-  {\color{headingrule}\rule{\linewidth}{\cvrulewidth}\par}%
+  \lcv@artifactpar{\color{headingrule}\rule{\linewidth}{\cvrulewidth}\par}%
   \fi
   %% One absolute gap for EVERY follower. \nointerlineskip -- drops the glue
   %% from the follower's own \baselineskip; visible gap is exactly this skip.
