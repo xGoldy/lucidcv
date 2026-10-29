@@ -1390,11 +1390,22 @@
 %% Filler that carries the date to the right margin for the `flushdate' key.
 %% A dotted leader prevents the phenomenon in geometry-based extractors,
 %% which would otherwise interpret the flushed date as a separate column.
+%% Define the filler as a tagging artifact, so tag-order readers skip them.
+\ExplSyntaxOn
+\cs_new_protected:Npn \lcv@artifactbegin
+  { \tag_mc_end_push: \tag_mc_begin:n { artifact } }
+\cs_new_protected:Npn \lcv@artifactend
+  { \tag_mc_end: \tag_mc_begin_pop:n { } }
+\ExplSyntaxOff
+
 \newcommand{\cventrydateleadersep}{0.333em}
 \newcommand{\cventrydateleadergap}{0.35em}
 \newcommand{\cventrydatefill}{%
   \unskip\nobreak\hskip\cventrydateleadergap\relax
+  \if@lcv@tagging\lcv@artifactbegin\fi
+  \nobreak  % the switch must not open a breakpoint before the leader
   \leaders\hbox to \cventrydateleadersep{\hss{\color{entryleader}.}\hss}\hfill
+  \if@lcv@tagging\lcv@artifactend\fi
   \penalty9999\hskip\cventrydateleadergap\hbox{}%
 }
 
