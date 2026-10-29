@@ -1256,11 +1256,12 @@
 \newcommand{\cventrymetafont}{\lcv@titlefont\footnotesize\lcv@entryscale}
 
 %% Entry separator (|), in the no-break slot so a wrap drops it. `penalty 1'
-%% overrides \hyphenpenalty. The pre-break slot's zero-width space glyph keeps
-%% the wrapped lines apart for tag-order readers, as a wrap leaves no glue.
+%% overrides \hyphenpenalty. Kerns get no space glyph, so tagpdf's \pdffakespace
+%% adds a zero-width one each side (kept at a wrap); \nobreak adds no breaks.
 \newcommand{\cventryseparator}{%
-  \discretionary penalty 1 {\makebox[0pt][l]{\symbol{"0020}}}{}%
-    {\kern0.35em\textbar\kern0.35em}%
+  \nobreak\pdffakespace\nobreak
+  \discretionary penalty 1 {}{}{\kern0.35em\textbar\kern0.35em}%
+  \nobreak\pdffakespace
 }
 
 %% The separator, dropped when every field to its left is empty.
