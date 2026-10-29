@@ -798,9 +798,9 @@
 \newcommand{\cvsubject}[1]{\def\lcv@subject{#1}}
 \newcommand{\cvkeywords}[1]{\def\lcv@keywords{#1}}  % Comma-separated
 
-%% Write the metadata to the document at the end via hook, because \name and
-%% \tagline are set AFTER \begin{document} in this class.
-\AddToHook{enddocument}{%
+%% Write the metadata as the first page ships: \name and \tagline must be set
+%% after \begin{document}, but before any content.
+\AddToHook{shipout/firstpage}{%
   \ifdefempty{\lcv@author}{\let\lcv@author\lcv@name}{}%
   %% The default title is built FROM the name; leave unset when no \name is set
   \ifdefempty{\lcv@title}%

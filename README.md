@@ -204,6 +204,8 @@ Values in parentheses apply when the `compressed` class option is used. Size and
 | `\cvsubject{subject}` | _tagline_ | PDF subject metadata; falls back to "Curriculum Vitae" when no tagline is set. |
 | `\cvkeywords{a, b, c}` | _empty_ | Comma-separated PDF keywords. |
 
+**Declare the metadata before the content.** Metadata (`\cvtitle`, `\cvauthor`, `\cvsubject`, and `\cvkeywords`) belong in the preamble, and `\name` and `\tagline` before `\makecvheader`, the same way as `main.tex` places them. The class writes PDF metadata when the first page is typeset, so metadata placed later in the document body are silently ignored.
+
 ### Header
 
 The header is defined by commands placed after `\begin{document}` and before the `cvbody` environment. These commands specify the name, tagline, photo, and contact details. `\makecvheader` then typesets the header from them. The name and tagline are also used as defaults for the PDF metadata described in the Preamble section.

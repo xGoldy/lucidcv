@@ -107,10 +107,11 @@ them through it, so a check added to `run.sh` is picked up without an edit.
 
 ## What is checked
 
-Five checks fail the run, in the order `run.sh` runs them. A sixth reports.
+Six checks fail the run, in the order `run.sh` runs them. A seventh reports.
 
-A check that cannot run on this machine — `subset-glyphs.py` and `icon-check.py`
-need PyMuPDF from `env/python` — prints `SKIP:` instead of a verdict. The run
+A check that cannot run on this machine — `subset-glyphs.py`, `icon-check.py`
+and `metadata-check.py` need PyMuPDF from `env/python` — prints `SKIP:` instead
+of a verdict. The run
 does not fail on it, but `pipeline.json` records the gate as `skipped` and the
 summary line names it, so a missing dependency never passes for a clean result.
 `pdfa-check.py` runs without PyMuPDF and skips only its font-embedding check.
@@ -207,6 +208,45 @@ filesystem can force, run `setup.sh` with `VERAPDF_PREFIX=<dir>`.
 `PATH`, so set `VERAPDF=<dir>/verapdf` (the executable, not the folder) when
 you run the suite. Without veraPDF the built-in checks still run and still fail
 the build — they just cannot cite chapter and verse, and the run says so.
+
+### `src/tests/metadata-check.py` — the metadata reached the XMP
+
+A PDF carries its title, author, subject and keywords twice: in the Info
+dictionary and in the XMP metadata stream. PDF/A and PDF/UA read the XMP —
+PDF/UA-1 7.1-9 requires a `dc:title` there — while `pdfinfo` and most viewers'
+property dialogs read the Info dictionary, so a gap between the two stays
+invisible.
+
+The gap it was written for was live in this repo. The class set the metadata
+in the `enddocument` hook, but the XMP packet is built when the last page ships,
+and in `twocolumn` `\end{paracol}` ships it before `\end{document}`. The Info
+dictionary was complete; the XMP had no title, author, subject or keywords.
+`lucidcv.cls` now sets them in `shipout/firstpage`, which the kernel runs ahead
+of `shipout/lastpage` in every layout — this check is what would notice if that
+ever stopped holding.
+
+It checks properties of any build, not values copied from `main.tex`:
+
+```text
+  XMP packet             present
+  dc:title               Adrian Castellanos -- Curriculum Vitae
+  dc:creator             Adrian Castellanos
+  dc:description         Senior Software Engineer
+  dc:subject             curriculum vitae; resume; software engineer; ...
+  dc:language            en-US  (catalog /Lang en-US)
+  DisplayDocTitle        true
+```
+
+* `dc:title` is present and non-empty.
+* Every field set in the Info dictionary is in the XMP with the same value:
+  Title as `dc:title`, Author as `dc:creator`, Subject as `dc:description`, and
+  Keywords, split at the commas, as the items of `dc:subject`.
+* `dc:language` agrees with the catalog's `/Lang`.
+* `/ViewerPreferences` has `/DisplayDocTitle true`, so a viewer's title bar
+  shows the title rather than the file name (PDF/UA-1 7.1-10).
+
+It fails the `twocolumn` build from before the fix on all four fields, and a
+build with `pdfdisplaydoctitle` dropped from the class on the last check.
 
 ### `src/tests/check.py` — did the phrase survive at all
 
@@ -466,10 +506,11 @@ tests/
     init-phrases.py         reads the .tex and writes the phrase list
     pipeline.py             the four stages for one MAIN; run.sh does the
                             checking, this decides what it is handed
-    tests/                  one file per check; run.sh runs all six in order
+    tests/                  one file per check; run.sh runs all seven in order
       subset-glyphs.py      word gaps are real space characters
       icon-check.py         icon glyphs extract as U+0020
       pdfa-check.py         the PDF/A-2B claim holds; veraPDF decides when installed
+      metadata-check.py     title, author, subject, keywords reached the XMP
       check.py              coverage — did the phrase survive, strict vs advisory
       order.py              reading order — did it survive *in sequence*; body
                             strict, header reported only
