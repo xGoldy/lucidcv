@@ -3,7 +3,7 @@
 # Package the class for a publication, e.g., for CTAN and Overleaf.
 #
 # Author: Patrik Goldschmidt
-# Date: 2026-10-06
+# Date: 2026-10-06, last update 2026-10-30
 
 # The script creates a dist/lucidcv.zip, holding a single lucidcv/ folder
 # with the class, fonts, sample, docs and the compiled sample. The test suite
@@ -76,11 +76,9 @@ readme_to_pdf() {
 
   mkdir -p "$work"
   cat > "$work/filter.lua" <<'LUA'
--- Images are dropped (badges are remote, screenshots not shipped), as are the
--- links they leave empty. Latin Modern has no star glyph.
+-- Images and links are dropped (badges are remote, screenshots not shipped).
 function Image() return {} end
 function Link(link) if #link.content == 0 then return {} end end
-function Str(str) str.text = str.text:gsub("⭐", "star") return str end
 
 -- GFM tables keep natural column widths, which LaTeX never wraps. A table wider
 -- than a line gets fixed widths: each column its longest word at least, the
