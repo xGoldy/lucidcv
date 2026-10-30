@@ -398,11 +398,13 @@ The Tesseract misses are OCR errors rather than problems with the PDF itself: th
 
 ### Manual Tests
 
-In addition to the automated tests described previously, I also performed several manual tests with the compiled PDFs produced by the Lucid CV class. For this purpose, existing ATS engines and PDF validators were used.
+In addition to the automated tests described previously, several manual tests described below were also performed.
 
-Firstly, the PDF was tested using the PDF accessibility checker [PDF4WCAG](https://pdf4wcag.com/), which assesses the accessibility of PDF documents against multiple standards, including WCAG and PDF/UA-1. PDFs produced by Lucid CV passed WCAG 2.2 Machine, PDF/UA-1, and ISO 32005 tests without any issues or warnings.
+1. **PDF Accessibility verification.** The PDFs produced by Lucid CV were tested using the online PDF accessibility checker [PDF4WCAG](https://pdf4wcag.com/), which assesses PDF accessibility against multiple standards, including WCAG and PDF/UA-1. All tested demo files passed WCAG 2.2 Machine, PDF/UA-1, and ISO 32005 tests without any issues or warnings.
 
-Regarding real-world ATS systems, I uploaded one-column PDF variants to three popular ATSs: Workday, Greenhouse, and Lever during my own job search. In all cases, relevant fields, including contact information, education, work experience, and skills, were extracted correctly.
+2. **Real-world ATS.** During my own job search, I uploaded one-column PDF variants to three popular ATSs: Workday, Greenhouse, and Lever. In all cases, relevant fields, including contact information, education, work experience, and skills, were extracted correctly. Several proprietary ATSs were also tested, all parsing the PDF contents correctly.
+
+3. **Copy-paste test.** Another popular test is to manually copy the text from the typeset PDF, paste it into a text editor such as Notepad, and manually observe the results. I performed this test with 3 PDF viewers: pdf.js in Visual Studio Code, Okular on Linux, and the PDF viewer in Firefox. In all cases, the text was extracted properly. For pdf.js, however, more spaces (double or sometimes triple) were extracted around pipe delimiters and when copying text containing icons. While inconvenient, whitespace is typically trimmed during machine parsing, so this should not affect the ATS scoring process
 
 ### Running the Tests Yourself
 
