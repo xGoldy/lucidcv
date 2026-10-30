@@ -1,0 +1,89 @@
+%% Lucid CV demo content file -- 1 column, 1 page, compressed.
+%%
+%% Author: Patrik Goldschmidt
+%% Date: 2026-10-13
+%%
+%% A condensed version of the full demo (../demo-1c2p/contents.tex) that fits one
+%% page in the compressed onecolumn layout.
+%%
+%% NOTICE: All content, including the photo, is fictional and AI-generated.
+
+\cvsection{About}
+
+\begin{justify}
+Senior software engineer with 8+ years of experience designing and operating distributed backend systems at scale. Specialized in \textbf{Go} and \textbf{Rust} services, Kubernetes platforms, and developer tooling. Led the migration of a payments platform to an event-driven architecture handling 40k requests per second at 99.99\% availability. Looking for a staff-level role building reliable cloud infrastructure.
+\end{justify}
+
+\cvsection{Experience}
+
+\cventry[oneline]{Senior Software Engineer}{Nimbravo Systems --- Los Angeles, CA}{03/2023 -- Present}
+\begin{itemize}
+  \item Lead a 6-engineer team owning the multi-region control plane for a managed Kubernetes offering running 2,000+ production clusters across 14 cloud regions.
+  \item Designed a Raft-based configuration store in Go that cut cluster provisioning time from 11 to 3 minutes.
+  \item Introduced OpenTelemetry tracing across 40 services, cutting mean time to resolution (MTTR) by 35\%.
+  \item Mentored 4 engineers to promotion; ran the backend interview loop.
+\end{itemize}
+
+\vspace{2pt}
+\cvtaglist{Go, Kubernetes, etcd, Raft, OpenTelemetry, Prometheus, AWS, Helm, Envoy}
+\smallskip
+
+\cventry[oneline]{Lumenquay Pay}{San Francisco, CA}{06/2018 -- 02/2023}
+\begin{cvgroup}[rule]
+  \cvsubentry[flushdate=false]{Software Engineer II}{Payments Platform}{01/2021 -- 02/2023}
+  \begin{itemize}
+    \item Led the migration from a monolithic Rails checkout to Go microservices over Kafka and gRPC, letting 12 teams release daily instead of every two weeks.
+    \item Built an idempotent ledger service processing \$2B+ in annual volume; cut p99 checkout latency from 850\:ms to 210\:ms.
+  \end{itemize}
+
+  \smallskip
+  \cvtaglist{Go, Kafka, gRPC, PostgreSQL, Redis, Terraform}
+
+  \cvsubentry[flushdate=false, bskip]{Software Engineer I}{Checkout Team}{06/2018 -- 12/2020}
+  Shipped the checkout SDK in TypeScript, adopted by 1,200+ merchants within its first year.
+
+  \smallskip
+  \cvtaglist{TypeScript, Ruby on Rails, PostgreSQL, GraphQL}
+\end{cvgroup}
+
+\cventry[oneline, askip=0.5em]{Software Engineering Intern}{Orbitrove Labs --- Remote}{06/2017 -- 09/2017}
+\begin{itemize}
+  \item Implemented a Python CLI for reproducible ML experiment tracking, later open-sourced by the company.
+\end{itemize}
+
+\cvsection{Open-Source Projects}
+
+\cventry[oneline]{quill-kv}{Embedded storage engine}{2022 -- Present}
+Crash-safe LSM-tree key-value store with lock-free memtables; 2.3k GitHub stars, used in production by 3 companies. Source: \href{https://github.com/adrian-castellanos-swe/quill-kv}{github.com/adrian-castellanos-swe/quill-kv}
+
+\cvdivider
+
+\cventry[oneline]{kubectl-pulse}{Kubernetes CLI tool}{2021}
+A \texttt{kubectl} plugin streaming live namespace health to the terminal; in the Krew index with 15k+ installs.
+
+\cvdivider
+
+\cventry[oneline]{Contributor to the Go standard library}{}{2020 -- 2022}
+Six merged patches to \texttt{net/http} and \texttt{database/sql}, including a fix for connection-pool starvation under context cancellation.
+
+\cvsection{Technical Skills}
+
+\textbf{Languages:} Go, Rust, Python, TypeScript, C, C++, SQL, Bash
+
+\textbf{Infrastructure \& Tools:} Kubernetes, Docker, Terraform, AWS, GCP, PostgreSQL, Kafka, Redis, gRPC, Prometheus, Argo CD, Helm, Linux
+
+\cvsection{Education}
+
+\cventry[oneline]{M.S. in Computer Science}{University of California, Los Angeles}{09/2016 -- 06/2018}
+\cventry[oneline]{B.S. in Computer Engineering, summa cum laude}{University of California, Los Angeles}{09/2012 -- 06/2016}
+
+\cvsection{Certifications}
+
+\cventry[oneline]{Certified Kubernetes Administrator (CKA)}{Cloud Native Computing Foundation}{2024}
+\cventry[oneline]{AWS Certified Solutions Architect -- Professional}{Amazon Web Services}{2022}
+
+\cvsection{Talks \& Languages}
+
+\cventry[oneline, noscale]{Zero-Downtime Control Plane Upgrades at Scale}{KubeCon + CloudNativeCon NA}{11/2025}
+\cventry[oneline]{English}{Native}{}
+\cventry[oneline]{Spanish}{Professional working proficiency (C1)}{}

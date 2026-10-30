@@ -1,0 +1,111 @@
+%% Lucid CV demo content file -- 2 columns, 1 page, compressed.
+%%
+%% Author: Patrik Goldschmidt
+%% Date: 2026-10-13
+%%
+%% A condensed version of the full demo (../demo-1c2p/contents.tex) that fits one
+%% page in the compressed twocolumn layout. \cvcolumnbreak moves the rest to
+%% the right column.
+%%
+%% NOTICE: All content, including the photo, is fictional and AI-generated.
+
+%% ---- Left column ------------------------------------------------------------
+\cvsection{About}
+
+\begin{justify}
+Senior software engineer with 8+ years of experience designing and operating distributed backend systems at scale. Specialized in \textbf{Go} and \textbf{Rust} services, Kubernetes platforms, and developer tooling. Led the migration of a payments platform to an event-driven architecture handling 40k requests per second at 99.99\% availability. Looking for a staff-level role building reliable cloud infrastructure.
+\end{justify}
+
+\cvsection{Experience}
+
+\cventry{Senior Software Engineer}{Nimbravo Systems --- Los Angeles, CA}{03/2023 -- Present}
+\begin{itemize}
+  \item Lead a 6-engineer team owning the multi-region control plane for a managed Kubernetes offering running 2,000+ production clusters.
+  \item Designed a Raft-based configuration store in Go that cut cluster provisioning time from 11 to 3 minutes.
+  \item Introduced OpenTelemetry tracing across 40 services, cutting MTTR by 35\%.
+  \item Mentored 4 engineers to promotion; ran the backend interview loop.
+\end{itemize}
+
+\vspace{2pt}
+\cvtaglist{Go, Kubernetes, Raft, OpenTelemetry, Prometheus, AWS}
+
+\cventry{Software Engineer}{Lumenquay Pay --- San Francisco, CA}{06/2018 -- 02/2023}
+\begin{itemize}
+  \item Led the migration from a monolithic Rails checkout to Go microservices over Kafka and gRPC, letting 12 teams release daily instead of every two weeks.
+  \item Built an idempotent ledger service processing \$2B+ in annual volume with exactly-once semantics.
+  \item Reduced p99 checkout latency from 850\:ms to 210\:ms through request hedging and a regional read cache.
+  \item Shipped the checkout SDK in TypeScript, adopted by 1,200+ merchants within a year.
+\end{itemize}
+
+\vspace{2pt}
+\cvtaglist{Go, Kafka, PostgreSQL, Redis, Terraform, TypeScript}
+
+\cventry{Software Engineering Intern}{Orbitrove Labs --- Remote}{06/2017 -- 09/2017}
+\begin{itemize}
+  \item Implemented a Python CLI for reproducible ML experiment tracking, later open-sourced by the company.
+\end{itemize}
+
+\vspace{2pt}
+\cvtag{Python}
+
+\cvsection{Education}
+
+\cventry{University of California, Los Angeles}{Los Angeles, CA}{09/2012 -- 06/2018}
+\begin{cvgroup}
+  \cvsubentry[oneline=false]{M.S. in Computer Science}{GPA 3.9/4.0}{09/2016 -- 06/2018}
+  Thesis: \emph{Adaptive Consistency Levels for Geo-Replicated Databases}.
+
+  \smallskip
+  \cvtaglist{Distributed databases, Go, Jepsen, TLA+, CRDTs}
+
+  \cvsubentry[oneline=false]{B.S. in Computer Engineering}{Summa cum laude}{09/2012 -- 06/2016}
+  Teaching Assistant for Operating Systems (CS 111) for 2 semesters.
+
+  \smallskip
+  \cvtaglist{{C, C++}, Linux, x86 assembly, Verilog, xv6}
+\end{cvgroup}
+
+%% ---- Right column -----------------------------------------------------------
+\cvcolumnbreak
+
+\cvsection{Open-Source Projects}
+
+\cventry{quill-kv}{Embedded storage engine}{2022 -- Present}
+Crash-safe key-value store built on an LSM tree with lock-free memtables. 2.3k stars on GitHub, used in production by 3 companies.
+
+\smallskip
+\cvtaglist{Rust, LSM tree, Tokio, Proptest}
+
+\cvdivider
+
+\cventry{kubectl-pulse}{Kubernetes CLI tool}{2021}
+A \texttt{kubectl} plugin streaming live namespace health to the terminal. Accepted into the Krew plugin index with 15k+ installs.
+
+\smallskip
+\cvtaglist{Go, client-go, Cobra, Bubble Tea}
+
+\cvdivider
+
+\cventry{Go contributor}{}{2020 -- 2022}
+Six merged patches to \texttt{net/http} and \texttt{database/sql}, including a connection-pool starvation fix.
+
+\cvsection{Technical Skills}
+
+\textbf{Languages:} Go, Rust, Python, TypeScript, C, C++, SQL, Bash
+
+\textbf{Infrastructure \& Tools:} Kubernetes, Docker, Terraform, AWS, GCP, PostgreSQL, Kafka, Redis, gRPC, Prometheus, Argo CD, Helm, Linux
+
+\textbf{Practices:} Distributed systems, system design, observability, CI/CD, code review
+
+\cvsection{Certifications}
+
+\cventry{Certified Kubernetes Administrator (CKA)}{CNCF}{2024}
+\cventry{AWS Solutions Architect -- Professional}{AWS}{2022}
+\cventry{Terraform Associate}{HashiCorp}{2021}
+
+\cvsection{Talks \& Languages}
+
+\cventry[noscale]{Zero-Downtime Control Plane Upgrades at Scale}{KubeCon NA}{11/2025}
+\cventry[noscale]{Exactly-Once Payments with Kafka Transactions}{GopherCon}{07/2022}
+\cventry[oneline]{English}{Native}{}
+\cventry[oneline]{Spanish}{Professional working proficiency (C1)}{}

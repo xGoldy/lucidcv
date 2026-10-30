@@ -1,10 +1,10 @@
-<title>Generic Résumé Variants Compared</title>
+<title>Demo Résumé Variants Compared</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&family=Inter:wght@400;500;600;700&display=swap">
 <style>
 :root{
-  --accent:#1D76E2; --accent-soft:#E7F0FC; --accent-line:#B9D4F5;
+  --accent:#1D74DE; --accent-soft:#E7F0FC; --accent-line:#B9D4F5;
   --ink:#101823; --ink-2:#46536B; --ink-3:#78849B;
   --paper:#F6F7FA; --card:#FFFFFF; --sunk:#EEF1F6; --line:#DCE1EA;
   --ok:#17784B; --ok-bg:#E2F1E9; --warn:#8A5A0F; --warn-bg:#FAF0DB;
@@ -109,20 +109,22 @@ li::marker{color:var(--ink-3)}
 <div class="wrap">
 
 <header>
-  <p class="eyebrow">Three generic variants &middot; 7 October 2026 &middot; full test run</p>
-  <h1>Lucid CV generic résumé: three variants compared</h1>
-  <p class="verdict">Three generic variants of the same résumé (one column on two
+  <p class="eyebrow">Three demo variants &middot; 30 October 2026 &middot; full test run</p>
+  <h1>Lucid CV demo résumé: three variants compared</h1>
+  <p class="verdict">Three variants of the Lucid CV demo résumé (one column on two
   pages, one column on one page, two columns on one page) were built fresh and read
-  back by thirteen text-extraction engines, simulating the process that an applicant
-  tracking system (ATS) uses before parsing a CV. <strong>All three variants pass
-  every test: every engine expected to handle the layout returns every phrase, in
-  order, with ordinary spaces between words.</strong> The only shortfalls come from
-  engines with known limitations: three that cannot separate two columns lose about
-  a third of the two-column variant&rsquo;s phrases, and OCR misreads 6&ndash;13
-  phrases per variant.</p>
+  back by seventeen text-extraction engines, simulating the process that an applicant
+  tracking system (ATS) uses before parsing a CV. Four of the engines read the
+  PDF&rsquo;s tags instead of the page, as screen readers do. <strong>All three
+  variants pass every test: every engine expected to handle the layout returns every
+  phrase, in order, with ordinary spaces between words, and every file is valid
+  PDF/A-2B and PDF/UA-1.</strong> The only shortfalls come from engines with known
+  limitations: three that cannot separate two columns lose about a third of the
+  two-column variant&rsquo;s phrases, and OCR misreads 1&ndash;5 phrases per
+  variant.</p>
   <div class="meta">
-    <span><b>3</b> variants</span><span><b>13</b> engines</span>
-    <span><b>91 / 76 / 73</b> phrases</span><span><b>15/15</b> tests passed</span>
+    <span><b>3</b> variants</span><span><b>17</b> engines</span>
+    <span><b>111 / 77 / 89</b> phrases</span><span><b>24/24</b> tests passed</span>
     <span>LuaHBTeX <b>1.24.0</b> (TeX Live 2026)</span>
   </div>
 </header>
@@ -131,12 +133,12 @@ li::marker{color:var(--ink-3)}
   <h2>Introduction</h2>
 
   <h3>The three variants</h3>
-  <p>All three variants present the same Cybersecurity &amp; AI Researcher résumé.
-  The number before <code>c</code> is the number of columns and the number before
-  <code>p</code> the number of pages, so <code>1c1p</code> is one column on one page.
-  The one-page variants are shortened versions of the full two-page text. In
-  <code>2c1p</code> the left column holds About, Experience, Education and Projects,
-  and the right column holds the remaining sections.</p>
+  <p>All three variants present the same fictional Senior Software Engineer résumé
+  shipped with the template in <code>resources/demos/</code>. The number before
+  <code>c</code> is the number of columns and the number before <code>p</code> the
+  number of pages, so <code>1c1p</code> is one column on one page.
+  <code>1c2p</code> is the full text, identical to the template&rsquo;s sample
+  <code>contents.tex</code>, whereas the one-page variants are condensed versions of it.</p>
   <div class="tbl"><table>
     <thead><tr><th scope="col"></th><th scope="col">1c2p</th><th scope="col">1c1p</th>
       <th scope="col">2c1p</th></tr></thead>
@@ -145,12 +147,12 @@ li::marker{color:var(--ink-3)}
       <tr><th>compressed style</th><td>no</td><td>yes</td><td>yes</td></tr>
       <tr><th>other layout changes</th><td>none</td>
         <td>margins 1.2/1.1&nbsp;cm, name 32&nbsp;pt, tagline 13&nbsp;pt, section 12&nbsp;pt, tighter gaps</td>
-        <td>name 34&nbsp;pt, tagline 14&nbsp;pt, tighter header gaps</td></tr>
-      <tr><th>photo</th><td>4.0&nbsp;cm</td><td>none</td><td>3.7&nbsp;cm</td></tr>
-      <tr><th>PDF size</th><td class="num">2,755,528 bytes</td><td class="num">152,721 bytes</td>
-        <td class="num">2,747,921 bytes</td></tr>
-      <tr><th>phrases checked (body + header)</th><td class="num">91 (83 + 8)</td>
-        <td class="num">76 (68 + 8)</td><td class="num">73 (65 + 8)</td></tr>
+        <td>none</td></tr>
+      <tr><th>photo</th><td>4.0&nbsp;cm</td><td>none</td><td>3.6&nbsp;cm</td></tr>
+      <tr><th>PDF size</th><td class="num">235,697 bytes</td><td class="num">143,059 bytes</td>
+        <td class="num">220,530 bytes</td></tr>
+      <tr><th>phrases checked (body + header)</th><td class="num">111 (102 + 9)</td>
+        <td class="num">77 (68 + 9)</td><td class="num">89 (80 + 9)</td></tr>
     </tbody>
   </table></div>
   <p class="cap">A <b>phrase</b> is one piece of text that must survive extraction
@@ -160,10 +162,19 @@ li::marker{color:var(--ink-3)}
   <h3>How the résumé is read back</h3>
   <p>Before an ATS can recognize a name, a job title or a date, it has to pull the
   text out of the PDF, and extraction software differs in how it does that. Every
-  PDF is therefore read by thirteen <b>engines</b>: the libraries behind common PDF
+  PDF is therefore read by seventeen <b>engines</b>: the libraries behind common PDF
   viewers and Linux tools (poppler, MuPDF, PDFium, pdf.js, Ghostscript), Python and
-  Java document pipelines (pdfminer, PDFBox, Tika), several in more than one mode,
-  and Tesseract, an OCR engine that reads the rendered page like a scanner.</p>
+  Java document pipelines (pdfminer, PDFBox, Tika, iText), several in more than one
+  mode, and Tesseract, an OCR engine that reads the rendered page like a
+  scanner.</p>
+  <p>Four of them, marked <code>-struct</code>, read the PDF differently. A tagged
+  PDF carries a hidden outline (its tags) that marks the document&rsquo;s elements
+  and defines its reading order. Most engines ignore it and infer the order from
+  where text is drawn on the page; <code>poppler-struct</code>,
+  <code>pdfjs-struct</code>, <code>tika-struct</code> and <code>itext-struct</code>
+  follow the outline instead, as screen readers and tag-aware parsers do. They
+  therefore test the tagging itself: untagged text never reaches them, and
+  decorative elements such as icons and dotted leaders are skipped.</p>
 
   <h3>Strict and advisory engines</h3>
   <p>Each engine is either <b>strict</b> or <b>advisory</b> for a given layout.</p>
@@ -177,8 +188,9 @@ li::marker{color:var(--ink-3)}
   text, so its errors measure the OCR rather than the document. In <b>two
   columns</b>, the engines that rebuild lines across the full page width merge the
   columns, so they are advisory there, and two engines that sort text by position
-  are advisory for reading order only. In one column, every engine except Tesseract
-  is strict.</p>
+  are advisory for reading order only. The four tag readers are strict everywhere:
+  they never look at where text is drawn, so the layout cannot affect them. In one
+  column, every engine except Tesseract is strict.</p>
   <div class="tbl"><table>
     <thead><tr><th scope="col">Engines</th><th scope="col">1c2p</th><th scope="col">1c1p</th>
       <th scope="col">2c1p</th></tr></thead>
@@ -188,14 +200,14 @@ li::marker{color:var(--ink-3)}
         <td>advisory</td></tr>
       <tr><th>poppler, pdfminer</th><td>strict</td><td>strict</td>
         <td>strict for phrases, advisory for order</td></tr>
-      <tr><th>the other seven</th><td>strict</td><td>strict</td><td>strict</td></tr>
+      <tr><th>the other eleven, incl. the four tag readers</th><td>strict</td><td>strict</td><td>strict</td></tr>
     </tbody>
   </table></div>
 </section>
 
 <section>
   <h2>Scoreboard</h2>
-  <p>Five tests can fail a résumé; the word-gap test only reports. Every variant was
+  <p>Eight tests can fail a résumé; the word-gap test only reports. Every variant was
   built and tested from scratch.</p>
   <div class="tbl"><table class="rail">
     <thead><tr><th scope="col">Test</th><th scope="col">1c2p</th><th scope="col">1c1p</th>
@@ -208,6 +220,12 @@ li::marker{color:var(--ink-3)}
       <tr class="ok"><th>icons as whitespace</th><td><span class="chip ok">pass</span></td>
         <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
       <tr class="ok"><th>PDF/A-2B conformance</th><td><span class="chip ok">pass</span></td>
+        <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
+      <tr class="ok"><th>PDF/UA-1 conformance</th><td><span class="chip ok">pass</span></td>
+        <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
+      <tr class="ok"><th>XMP metadata</th><td><span class="chip ok">pass</span></td>
+        <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
+      <tr class="ok"><th>hidden text</th><td><span class="chip ok">pass</span></td>
         <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
       <tr class="ok"><th>text extraction</th><td><span class="chip ok">pass</span></td>
         <td><span class="chip ok">pass</span></td>
@@ -229,22 +247,23 @@ li::marker{color:var(--ink-3)}
     <thead><tr><th scope="col">Font</th><th scope="col" class="num">1c2p</th>
       <th scope="col" class="num">1c1p</th><th scope="col" class="num">2c1p</th></tr></thead>
     <tbody>
-      <tr><th>Inter-Light (body text)</th><td class="num">621</td><td class="num">399</td><td class="num">422</td></tr>
-      <tr><th>Inter-LightItalic</th><td class="num">51</td><td class="num">46</td><td class="num">42</td></tr>
-      <tr><th>Inter-SemiBold</th><td class="num">11</td><td class="num">11</td><td class="num">9</td></tr>
-      <tr><th>SourceSans3-Light</th><td class="num">35</td><td class="num">77</td><td class="num">56</td></tr>
-      <tr><th>SourceSans3-Semibold</th><td class="num">52</td><td class="num">24</td><td class="num">23</td></tr>
-      <tr class="ok"><th>total, 5 text fonts</th><td class="num"><span class="v-ok">770</span></td>
-        <td class="num"><span class="v-ok">557</span></td><td class="num"><span class="v-ok">552</span></td></tr>
+      <tr><th>Inter-Light (body text)</th><td class="num">516</td><td class="num">283</td><td class="num">325</td></tr>
+      <tr><th>Inter-LightItalic</th><td class="num">5</td><td class="num">&mdash;</td><td class="num">5</td></tr>
+      <tr><th>Inter-SemiBold</th><td class="num">17</td><td class="num">6</td><td class="num">7</td></tr>
+      <tr><th>SourceSans3-Light</th><td class="num">128</td><td class="num">126</td><td class="num">110</td></tr>
+      <tr><th>SourceSans3-Semibold</th><td class="num">57</td><td class="num">43</td><td class="num">44</td></tr>
+      <tr><th>SourceCodePro-Light</th><td class="num">2</td><td class="num">2</td><td class="num">2</td></tr>
+      <tr class="ok"><th>total, all text fonts</th><td class="num"><span class="v-ok">725</span></td>
+        <td class="num"><span class="v-ok">460</span></td><td class="num"><span class="v-ok">493</span></td></tr>
       <tr class="ok"><th>result</th><td><span class="chip ok">pass</span></td>
         <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
     </tbody>
   </table></div>
   <p><b>Discussion.</b> All three variants store every word gap as a real space
   character, so no extractor has to guess where words end. The totals only follow
-  the amount of text. Neither the compressed style nor two columns changes how gaps
-  are stored, since that is set by the typesetting engine and the template, not by
-  the layout.</p>
+  the amount of text, and <code>1c1p</code> simply has no italic text. Neither the
+  compressed style nor two columns changes how gaps are stored, since that is set by
+  the typesetting engine and the template, not by the layout.</p>
 </section>
 
 <section>
@@ -258,17 +277,18 @@ li::marker{color:var(--ink-3)}
     <thead><tr><th scope="col"></th><th scope="col">1c2p</th><th scope="col">1c1p</th>
       <th scope="col">2c1p</th></tr></thead>
     <tbody>
-      <tr class="ok"><th>engines with only U+0020 gaps</th><td class="num"><span class="v-ok">13</span>/13</td>
-        <td class="num"><span class="v-ok">13</span>/13</td><td class="num"><span class="v-ok">13</span>/13</td></tr>
+      <tr class="ok"><th>engines with only U+0020 gaps</th><td class="num"><span class="v-ok">17</span>/17</td>
+        <td class="num"><span class="v-ok">17</span>/17</td><td class="num"><span class="v-ok">17</span>/17</td></tr>
       <tr class="ok"><th>gaps that would join words in Java</th><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
       <tr class="ok"><th>result</th><td><span class="chip mute">report</span> clean</td>
         <td><span class="chip mute">report</span> clean</td><td><span class="chip mute">report</span> clean</td></tr>
     </tbody>
   </table></div>
-  <p><b>Discussion.</b> All thirteen engines, Tesseract included, return a plain
-  space for every word gap in all three variants, consistent with test 1: a real
-  space character leaves nothing an engine could turn into a no-break space. No
-  Java-based parser would run two words together.</p>
+  <p><b>Discussion.</b> All seventeen engines, Tesseract and the four tag readers
+  included, return a plain space for every word gap in all three variants,
+  consistent with test 1: a real space character leaves nothing an engine could
+  turn into a no-break space. No Java-based parser would run two words
+  together.</p>
 </section>
 
 <section>
@@ -281,15 +301,15 @@ li::marker{color:var(--ink-3)}
       <th scope="col" class="num">1c1p</th><th scope="col" class="num">2c1p</th></tr></thead>
     <tbody>
       <tr class="ok"><th>FontAwesome5Brands-Regular</th><td class="num">2 ok</td><td class="num">2 ok</td><td class="num">2 ok</td></tr>
-      <tr class="ok"><th>FontAwesome5Free-Solid</th><td class="num">4 ok</td><td class="num">4 ok</td><td class="num">4 ok</td></tr>
+      <tr class="ok"><th>FontAwesome5Free-Solid</th><td class="num">6 ok</td><td class="num">5 ok</td><td class="num">5 ok</td></tr>
       <tr class="ok"><th>result</th><td><span class="chip ok">pass</span></td>
         <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
     </tbody>
   </table></div>
   <p><b>Discussion.</b> All three variants share the same contact block (two brand
-  icons for LinkedIn and GitHub, four solid icons for the other fields), and all six
-  icons extract as a plain space in every build. This is expected: icon extraction
-  is set by the template, so layout choices cannot change it.</p>
+  icons for LinkedIn and GitHub, five solid icons for the other fields), and every
+  icon extracts as a plain space (or is skipped for tagged PDF readers) in every
+  build.</p>
 </section>
 
 <section>
@@ -311,14 +331,90 @@ li::marker{color:var(--ink-3)}
         <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
     </tbody>
   </table></div>
-  <p><b>Discussion.</b> All three files are valid PDF/A-2B. The photo, about
-  2.6&nbsp;MB of <code>1c2p</code> and <code>2c1p</code>, does not affect conformance,
-  but it is the whole size difference, so the photo-less <code>1c1p</code> suits
-  portals that limit upload size.</p>
 </section>
 
 <section>
-  <h2>5 &middot; Text extraction</h2>
+  <h2>5 &middot; PDF/UA-1 conformance</h2>
+  <p><b>What it tests.</b> PDF/UA is the accessibility standard for PDF: the file
+  must be tagged, so that screen readers and other assistive software can follow
+  its structure, its links must carry a description, and its images an alternative
+  text. As with PDF/A, the PDF/UA label proves nothing on its own, so veraPDF checks
+  every machine-checkable rule of the standard.</p>
+  <div class="tbl"><table class="rail">
+    <thead><tr><th scope="col">Check</th><th scope="col">1c2p</th><th scope="col">1c1p</th>
+      <th scope="col">2c1p</th></tr></thead>
+    <tbody>
+      <tr><th>identification</th><td>PDF/UA-1</td><td>PDF/UA-1</td><td>PDF/UA-1</td></tr>
+      <tr><th>tagged (structure tree)</th><td>yes</td><td>yes</td><td>yes</td></tr>
+      <tr><th>tab order follows the structure</th><td>yes</td><td>yes</td><td>yes</td></tr>
+      <tr><th>links, with a description</th><td class="num">6 of 6</td><td class="num">6 of 6</td><td class="num">5 of 5</td></tr>
+      <tr><th>images, with alternative text</th><td class="num">1 of 1</td><td class="num">none</td><td class="num">1 of 1</td></tr>
+      <tr class="ok"><th>veraPDF 1.30.2</th><td><span class="chip ok">pass</span></td>
+        <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>6 &middot; XMP metadata</h2>
+  <p><b>What it tests.</b> A PDF stores its title, author, subject and keywords
+  twice: in a legacy dictionary that most viewers display, and in an XMP packet that
+  PDF/A and PDF/UA require. A gap between the two goes unnoticed in a viewer, so the
+  test checks that every field reached the XMP with the same value, that its
+  language matches the document&rsquo;s, and that viewers show the title rather than
+  the file name.</p>
+  <div class="tbl"><table class="rail">
+    <thead><tr><th scope="col">Field</th><th scope="col">1c2p</th><th scope="col">1c1p</th>
+      <th scope="col">2c1p</th></tr></thead>
+    <tbody>
+      <tr><th>XMP packet</th><td>present</td><td>present</td><td>present</td></tr>
+      <tr><th>title</th><td colspan="3">Adrian Castellanos -- Curriculum Vitae</td></tr>
+      <tr><th>author</th><td colspan="3">Adrian Castellanos</td></tr>
+      <tr><th>subject</th><td colspan="3">Senior Software Engineer</td></tr>
+      <tr><th>keywords</th><td colspan="3">6, matching the legacy dictionary</td></tr>
+      <tr><th>language</th><td>en-US</td><td>en-US</td><td>en-US</td></tr>
+      <tr><th>viewer shows the title</th><td>yes</td><td>yes</td><td>yes</td></tr>
+      <tr class="ok"><th>result</th><td><span class="chip ok">pass</span></td>
+        <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Discussion.</b> All three variants carry identical, complete metadata. The
+  template fills the title, author and subject from the résumé header, so a
+  two-column layout does not affect the result.</p>
+</section>
+
+<section>
+  <h2>7 &middot; Hidden text</h2>
+  <p><b>What it tests.</b> Hidden (visually invisible) text is a common method for
+  keyword stuffing, i.e., including keywords beyond the visible text to increase
+  search engine ranking. It is often achieved by placing white words on white
+  background, tiny font sizes, or pusing the text off the page. Some screening
+  tools already detect and flag the whole document, discarding the candidate with
+  such a resume from the process entirely. This test checks that every character
+  other than whitespace is visible: drawn, in a colour distinguishable from white,
+  opaque, at least 4&nbsp;pt, on the page, and not hidden under other text or an
+  image.</p>
+  <div class="tbl"><table class="rail">
+    <thead><tr><th scope="col">Check</th><th scope="col" class="num">1c2p</th>
+      <th scope="col" class="num">1c1p</th><th scope="col" class="num">2c1p</th></tr></thead>
+    <tbody>
+      <tr><th>characters (of which whitespace)</th><td class="num">5,917 (736)</td><td class="num">3,882 (467)</td><td class="num">3,717 (500)</td></tr>
+      <tr><th>faintest text, contrast on white</th><td class="num">1.51:1</td><td class="num">1.51:1</td><td class="num">1.51:1</td></tr>
+      <tr><th>invisible / faint / transparent / tiny</th><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+      <tr><th>off-page / stacked / under an image</th><td class="num">0</td><td class="num">0</td><td class="num">0</td></tr>
+      <tr class="ok"><th>result</th><td><span class="chip ok">pass</span></td>
+        <td><span class="chip ok">pass</span></td><td><span class="chip ok">pass</span></td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Discussion.</b> No variant has a single hidden character. The faintest text
+  is the light grey dotted leader before each date, at 1.51:1 against white, still
+  above the 1.25:1 limit. The only invisible characters are whitespace: the real
+  word spaces of test 1 and a few zero-width spaces the template adds so that
+  separators extract cleanly. Whitespace carries no keywords and is allowed.</p>
+</section>
+
+<section>
+  <h2>8 &middot; Text extraction</h2>
   <p><b>What it tests.</b> The core test: every phrase must appear, complete, in each
   engine&rsquo;s text. Differences that do not change the meaning (dash and quote
   styles, ligatures, letter case) are ignored.</p>
@@ -326,31 +422,35 @@ li::marker{color:var(--ink-3)}
     <thead><tr><th scope="col">Engine</th><th scope="col" class="num">1c2p</th>
       <th scope="col" class="num">1c1p</th><th scope="col" class="num">2c1p</th></tr></thead>
     <tbody>
-      <tr class="ok"><th>poppler</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-ok">73</span>/73</td></tr>
-      <tr class="ok"><th>poppler-raw</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-ok">73</span>/73</td></tr>
-      <tr class="warn"><th>poppler-layout</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-warn">49</span>/73 <span class="chip warn">advisory</span></td></tr>
-      <tr class="ok"><th>mupdf</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-ok">73</span>/73</td></tr>
-      <tr class="ok"><th>pdfium</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-ok">73</span>/73</td></tr>
-      <tr class="ok"><th>pdfminer</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-ok">73</span>/73</td></tr>
-      <tr class="warn"><th>ghostscript</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-warn">50</span>/73 <span class="chip warn">advisory</span></td></tr>
-      <tr class="ok"><th>pdfjs-old</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-ok">73</span>/73</td></tr>
-      <tr class="ok"><th>pdfjs-new</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-ok">73</span>/73</td></tr>
-      <tr class="ok"><th>pdfbox</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-ok">73</span>/73</td></tr>
-      <tr class="warn"><th>pdfbox-sorted</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-warn">49</span>/73 <span class="chip warn">advisory</span></td></tr>
-      <tr class="ok"><th>tika</th><td class="num"><span class="v-ok">91</span>/91</td><td class="num"><span class="v-ok">76</span>/76</td><td class="num"><span class="v-ok">73</span>/73</td></tr>
-      <tr class="warn"><th>tesseract <em>(OCR)</em></th><td class="num"><span class="v-warn">78</span>/91 <span class="chip warn">advisory</span></td><td class="num"><span class="v-warn">70</span>/76 <span class="chip warn">advisory</span></td><td class="num"><span class="v-warn">65</span>/73 <span class="chip warn">advisory</span></td></tr>
+      <tr class="ok"><th>poppler</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="ok"><th>poppler-raw</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="warn"><th>poppler-layout</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-warn">61</span>/89 <span class="chip warn">advisory</span></td></tr>
+      <tr class="ok"><th>poppler-struct</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="ok"><th>mupdf</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="ok"><th>pdfium</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="ok"><th>pdfminer</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="warn"><th>ghostscript</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-warn">60</span>/89 <span class="chip warn">advisory</span></td></tr>
+      <tr class="ok"><th>pdfjs-old</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="ok"><th>pdfjs-new</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="ok"><th>pdfjs-struct</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="ok"><th>pdfbox</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="warn"><th>pdfbox-sorted</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-warn">63</span>/89 <span class="chip warn">advisory</span></td></tr>
+      <tr class="ok"><th>tika</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="ok"><th>tika-struct</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="ok"><th>itext-struct</th><td class="num"><span class="v-ok">111</span>/111</td><td class="num"><span class="v-ok">77</span>/77</td><td class="num"><span class="v-ok">89</span>/89</td></tr>
+      <tr class="warn"><th>tesseract <em>(OCR)</em></th><td class="num"><span class="v-warn">106</span>/111 <span class="chip warn">advisory</span></td><td class="num"><span class="v-warn">76</span>/77 <span class="chip warn">advisory</span></td><td class="num"><span class="v-warn">86</span>/89 <span class="chip warn">advisory</span></td></tr>
     </tbody>
   </table></div>
 
   <h3>Two-column splicing in 2c1p</h3>
   <p>The three engines that lose phrases in <code>2c1p</code> rebuild each printed
   line across the full page width, so a phrase that wraps in one column gets the
-  other column&rsquo;s text inserted where it breaks. Accordingly, 21&ndash;23 of the
-  missing phrases are long, wrapping ones, spread over every section.</p>
+  other column&rsquo;s text inserted where it breaks. Accordingly, the missing
+  phrases are the long, wrapping ones, spread over every section.</p>
   <figure class="ev">
     <figcaption>What <code>poppler-layout</code> extracts from <code>2c1p</code>, verbatim</figcaption>
-<pre><span class="hit">• Built a federated learning anomaly-detection and classification                Personal: Data-driven, Independent,</span><span class="hit">  PoC for payment fraud detection, uncovering undetected fraud                   Organized, Systematic, Adaptable</span><span>  and cutting detection time from weeks to minutes.</span></pre>
-    <p class="cap">An Experience bullet (left column) and the Personal skills line
+<pre><span class="hit">Senior Software Engineer | Nimbravo Systems — Los Angeles,                             kubectl-pulse | Kubernetes CLI</span><span class="hit">CA ........................................................... 03/2023 – Present       tool .................................. 2021</span><span>• Lead a 6-engineer team owning the multi-region control plane for</span></pre>
+    <p class="cap">An Experience entry (left column) and an Open-Source Projects entry
     (right column) merged line by line; <code>ghostscript</code> and
     <code>pdfbox-sorted</code> do the same.</p>
   </figure>
@@ -358,9 +458,9 @@ li::marker{color:var(--ink-3)}
     <thead><tr><th scope="col">Engine (2c1p)</th><th scope="col" class="num">Lost</th>
       <th scope="col">By section</th></tr></thead>
     <tbody>
-      <tr><th>poppler-layout</th><td class="num">24</td><td>experience 7, skills 4, education 3, volunteering 3, projects 2, courses 2, publications 2, about 1</td></tr>
-      <tr><th>ghostscript</th><td class="num">23</td><td>experience 5, education 4, skills 4, volunteering 3, projects 2, courses 2, publications 2, about 1</td></tr>
-      <tr><th>pdfbox-sorted</th><td class="num">24</td><td>experience 7, skills 4, education 3, volunteering 3, projects 2, courses 2, publications 2, about 1</td></tr>
+      <tr><th>poppler-layout</th><td class="num">28</td><td>experience 10, open-source projects 6, technical skills 3, certifications 3, talks &amp; languages 3, education 2, about 1</td></tr>
+      <tr><th>ghostscript</th><td class="num">29</td><td>experience 11, open-source projects 6, technical skills 3, certifications 3, talks &amp; languages 3, education 2, about 1</td></tr>
+      <tr><th>pdfbox-sorted</th><td class="num">26</td><td>experience 9, open-source projects 6, technical skills 3, talks &amp; languages 3, education 2, certifications 2, about 1</td></tr>
     </tbody>
   </table></div>
 
@@ -368,112 +468,131 @@ li::marker{color:var(--ink-3)}
   three variants, so the text stored in the PDF is complete whatever the layout.
   The only difference comes from two columns: in <code>2c1p</code>,
   <code>poppler-layout</code>, <code>ghostscript</code> and <code>pdfbox-sorted</code>
-  recover only 67&ndash;68% of the phrases. This is not a fault in the PDF: these
+  recover only 67&ndash;71% of the phrases. This is not a fault in the PDF: these
   engines cannot separate side-by-side columns, and they return 100% of both
   one-column variants. The compressed style causes no losses.</p>
+
+  <p><b>Discussion: the tag readers.</b> All four return every phrase in every
+  variant, which also confirms that every visible phrase is tagged. Ignoring the page
+  layout, they read <code>2c1p</code> as cleanly as a one-column résumé.</p>
 
   <h3>Tesseract: OCR misses by cause</h3>
   <div class="tbl"><table>
     <thead><tr><th scope="col">Cause</th><th scope="col" class="num">1c2p</th>
       <th scope="col" class="num">1c1p</th><th scope="col" class="num">2c1p</th></tr></thead>
     <tbody>
-      <tr><th>capital <code>AI</code> read as <code>Al</code></th><td class="num">6</td><td class="num">2</td><td class="num">5</td></tr>
-      <tr><th>diacritics dropped (<code>Chudá</code>, <code>Kučera</code>)</th><td class="num">4</td><td class="num">3</td><td class="num">2</td></tr>
-      <tr><th>Scholar URL misread (<code>9_uI59…</code>)</th><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
-      <tr><th>stray character (<code>model</code> &rarr; <code>modell</code>, <code>Goldschmidt</code> &rarr; <code>Goldschmiadt</code>)</th><td class="num">2</td><td class="num">0</td><td class="num">0</td></tr>
-      <tr><th>total</th><td class="num"><span class="v-warn">13</span>/91</td><td class="num"><span class="v-warn">6</span>/76</td><td class="num"><span class="v-warn">8</span>/73</td></tr>
+      <tr><th>phone digit groups run together (<code>+1 3105550142</code>)</th><td class="num">1</td><td class="num">1</td><td class="num">1</td></tr>
+      <tr><th>capital <code>I</code> read as <code>l</code> (<code>CI/CD</code> &rarr; <code>Cl/CD</code>, <code>Idempotent</code> &rarr; <code>ldempotent</code>)</th><td class="num">2</td><td class="num">0</td><td class="num">1</td></tr>
+      <tr><th>other misread letter (<code>gRPC</code> &rarr; <code>JRPC</code>)</th><td class="num">1</td><td class="num">0</td><td class="num">0</td></tr>
+      <tr><th>stray character (<code>Verilog –</code> &rarr; <code>Verilog -—</code>)</th><td class="num">1</td><td class="num">0</td><td class="num">0</td></tr>
+      <tr><th>wrapped date read as two blocks (<code>09/2012 –</code> / <code>06/2018</code>)</th><td class="num">0</td><td class="num">0</td><td class="num">1</td></tr>
+      <tr><th>total</th><td class="num"><span class="v-warn">5</span>/111</td><td class="num"><span class="v-warn">1</span>/77</td><td class="num"><span class="v-warn">3</span>/89</td></tr>
     </tbody>
   </table></div>
 
   <p><b>Discussion: Tesseract OCR.</b> Tesseract reads a rendered image of the page,
-  not the text stored in the PDF, so its misses are OCR character errors rather
-  than layout problems. As the table shows, they concentrate on the capital
-  <code>AI</code>, which the sans-serif face makes hard to tell from <code>Al</code>,
-  and on Czech and Slovak diacritics. Their number follows how often these strings
-  occur, so the shortest variant, <code>1c1p</code>, has the fewest. One stray
-  character is new since the previous report: the <code>1c2p</code> surname, set in
-  Source Sans&nbsp;3 instead of Source Sans Pro, comes back as
-  <code>Goldschmiadt</code>. Rendering at 600&nbsp;dpi does not help: the
-  <code>AI</code>, diacritic and URL errors recur unchanged, and a few different
-  stray characters replace the old ones, for 13 / 9 / 9 misses against 13 / 6 / 8
-  at 300&nbsp;dpi.</p>
+  not the stored text, so its misses are mostly character errors. The phone number
+  fails everywhere because OCR drops the narrow gaps between its digit groups; the
+  rest are scattered misreads, mostly a capital <code>I</code> taken for
+  <code>l</code>. In <code>2c1p</code>, the education date wraps after its dash and
+  OCR splits the halves into separate blocks. Rendering at 600&nbsp;dpi does not
+  help: 8 / 3 / 7 misses against 5 / 1 / 3 at 300&nbsp;dpi, with new misreads such
+  as <code>net/htto</code>.</p>
 
-  <p><b>Possible fix.</b> The <code>AI</code> errors, and the Scholar URL, whose
-  capital <code>I</code> comes back as <code>l</code>, have one cause: in Inter, the
-  capital I and the lowercase l are both a plain vertical stroke, so OCR has to
-  guess. The fix is a body typeface whose capital I and lowercase l differ in their
-  regular shapes, for example an I with serifs or an l with a tail. The dropped
-  diacritics are a different matter: they come from OCR running with an English-only
-  language model, as in this test setup, and no change of font would fix them.</p>
+  <p><b>Possible fix.</b> The <code>I</code>/<code>l</code> errors have one cause: in
+  the Inter font, the capital I and the lowercase l are both a plain vertical stroke,
+  so OCR has to guess. The fix is a body typeface whose capital I and lowercase l
+  differ in their regular shapes, for example an I with serifs or an l with a tail.
+  The wrapped date in <code>2c1p</code> could be kept on one line by shortening the
+  entry or widening the left column.</p>
 
   <p><b>Practical relevance.</b> In practice, the OCR errors matter little. ATS
   parsers work primarily with the text stored in the PDF, and since this file is
-  tagged, PDF/A-2B-compliant and its text reads back completely, a fallback to pure
-  OCR is unlikely. The OCR results are therefore for informational purposes only.</p>
+  tagged, PDF/A-2B- and PDF/UA-1-compliant and its text reads back completely, a
+  fallback to pure OCR is unlikely. The OCR results are therefore for informational
+  purposes only.</p>
 </section>
 
 <section>
-  <h2>6 &middot; Reading order</h2>
+  <h2>9 &middot; Reading order</h2>
   <p><b>What it tests.</b> Finding every phrase is not enough if they come back
   scrambled: an ATS that reads a date after the wrong employer files it under the
   wrong job. The test scores how much of each engine&rsquo;s output keeps the order
-  the text is stored in, from 0 to 1 (perfect). The body must score 1.00 in every
-  strict engine; the contact header is only reported, since the order of contact
-  fields carries no meaning.</p>
+  the text is stored in, from 0 to 1 (perfect). The tag readers are scored against
+  the order the tags declare instead, which in turn must match the stored order. The
+  body must score 1.00 in every strict engine; the contact header is only reported,
+  since the order of contact fields carries no meaning.</p>
   <div class="tbl"><table class="rail">
     <thead><tr><th scope="col">Engine &mdash; body order score</th><th scope="col" class="num">1c2p</th>
       <th scope="col" class="num">1c1p</th><th scope="col" class="num">2c1p</th></tr></thead>
     <tbody>
-      <tr class="warn"><th>poppler</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num"><span class="v-warn">0.86</span> (56/65) <span class="chip warn">advisory</span></td></tr>
-      <tr class="ok"><th>poppler-raw</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num">1.00 (65/65)</td></tr>
-      <tr class="warn"><th>poppler-layout</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num"><span class="v-warn">0.71</span> (29/41) <span class="chip warn">advisory</span></td></tr>
-      <tr class="ok"><th>mupdf</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num">1.00 (65/65)</td></tr>
-      <tr class="ok"><th>pdfium</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num">1.00 (65/65)</td></tr>
-      <tr class="ok"><th>pdfminer</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num">1.00 (65/65) <span class="chip mute">advisory</span></td></tr>
-      <tr class="warn"><th>ghostscript</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num"><span class="v-warn">0.71</span> (30/42) <span class="chip warn">advisory</span></td></tr>
-      <tr class="ok"><th>pdfjs-old</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num">1.00 (65/65)</td></tr>
-      <tr class="ok"><th>pdfjs-new</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num">1.00 (65/65)</td></tr>
-      <tr class="ok"><th>pdfbox</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num">1.00 (65/65)</td></tr>
-      <tr class="warn"><th>pdfbox-sorted</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num"><span class="v-warn">0.71</span> (29/41) <span class="chip warn">advisory</span></td></tr>
-      <tr class="ok"><th>tika</th><td class="num">1.00 (83/83)</td><td class="num">1.00 (68/68)</td><td class="num">1.00 (65/65)</td></tr>
-      <tr class="ok"><th>tesseract <em>(OCR)</em></th><td class="num">1.00 (73/73)</td><td class="num">1.00 (64/64)</td><td class="num">1.00 (59/59)</td></tr>
-      <tr class="warn"><th>header, all engines</th><td class="num">1.00</td><td class="num">1.00 except <span class="v-warn">poppler 0.88</span> (7/8) <span class="chip mute">report</span></td><td class="num">1.00</td></tr>
+      <tr class="warn"><th>poppler</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-warn">0.95</span> (78/82) <span class="chip warn">advisory</span></td></tr>
+      <tr class="ok"><th>poppler-raw</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="warn"><th>poppler-layout</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-warn">0.56</span> (30/54) <span class="chip warn">advisory</span></td></tr>
+      <tr class="ok"><th>poppler-struct</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="ok"><th>mupdf</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="ok"><th>pdfium</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="ok"><th>pdfminer</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82) <span class="chip mute">advisory</span></td></tr>
+      <tr class="warn"><th>ghostscript</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-warn">0.57</span> (30/53) <span class="chip warn">advisory</span></td></tr>
+      <tr class="ok"><th>pdfjs-old</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="ok"><th>pdfjs-new</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="ok"><th>pdfjs-struct</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="ok"><th>pdfbox</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="warn"><th>pdfbox-sorted</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-warn">0.55</span> (31/56) <span class="chip warn">advisory</span></td></tr>
+      <tr class="ok"><th>tika</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="ok"><th>tika-struct</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="ok"><th>itext-struct</th><td class="num"><span class="v-ok">1.00</span> (104/104)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (82/82)</td></tr>
+      <tr class="ok"><th>tesseract <em>(OCR)</em></th><td class="num"><span class="v-ok">1.00</span> (100/100)</td><td class="num"><span class="v-ok">1.00</span> (69/69)</td><td class="num"><span class="v-ok">1.00</span> (80/80)</td></tr>
+      <tr class="warn"><th>header, all engines</th><td class="num"><span class="v-ok">1.00</span></td><td class="num"><span class="v-ok">1.00</span> except <span class="v-warn">poppler 0.80</span> <span class="chip mute">report</span></td><td class="num"><span class="v-ok">1.00</span></td></tr>
     </tbody>
   </table></div>
   <p class="cap">In brackets: phrases in order / phrases found, so an engine that lost
-  phrases is scored on fewer of them. The reference order comes from
-  <code>poppler-raw</code>, which outputs the text exactly as stored.</p>
+  phrases is scored on fewer of them; a phrase listed twice is counted at each place.
+  The stored order comes from <code>poppler-raw</code>, which outputs the text exactly
+  as stored. The tag order comes from <code>itext-struct</code>, which walks the
+  whole tag outline; it is itself scored against the stored order.</p>
 
-  <div class="note"><b>poppler in 1c1p: LinkedIn moves to the end.</b> poppler moves
-  <code>linkedin.com/in/…</code> from the end of the first contact line to after the
-  Scholar link on the second. The field is complete, only later in the output.</div>
+  <div class="note"><b>poppler in 1c1p: the second contact line comes first.</b>
+  poppler outputs <code>linkedin.com/in/…</code> and <code>github.com/…</code>, the
+  second contact line, before <code>US citizenship</code> and
+  <code>adriancastellanos.dev</code>, the end of the first. Every field is complete,
+  only in a different order. Since this is a header and the text is not garbled,
+  this does not affect ATS performance.</div>
 
   <div class="two">
     <figure class="ev">
       <figcaption>Reference order (<code>poppler-raw</code>): section headings in <code>2c1p</code></figcaption>
-<pre><span>About</span><span>Experience</span><span>Education</span><span>Projects</span><span class="keep">Skills</span><span>Courses &amp; Certifications</span><span>Selected Publications</span><span>Volunteering</span></pre>
+<pre><span>About</span><span>Experience</span><span>Education</span><span class="keep">Open-Source Projects</span><span>Technical Skills</span><span>Certifications</span><span>Talks &amp; Languages</span></pre>
       <p class="cap">The left column first, then the right one, as the PDF stores
-      them.</p>
+      them and as the tags declare them.</p>
     </figure>
     <figure class="ev">
       <figcaption>What <code>poppler</code> extracts from <code>2c1p</code>, verbatim (abridged)</figcaption>
-<pre><span>About</span><span> </span><span class="hit">Skills</span><span> </span><span>Researcher with 9 years of applied research and R&amp;D experience,</span><span>&hellip; (rest of the About paragraph)</span><span> </span><span class="hit">Professional: Artificial Intelligence &amp;</span><span class="hit">&hellip;</span><span class="hit">Tools: Python for AI (numpy, pandas,</span><span class="hit">&hellip;</span><span class="hit">Personal: Data-driven, Independent,</span><span class="hit">&hellip;</span><span class="hit">Languages: English (full professional</span><span class="hit">&hellip;</span><span>Experience</span></pre>
-      <p class="cap">The right column&rsquo;s Skills heading and block (highlighted)
+<pre><span>About</span><span> </span><span class="hit">Open-Source Projects</span><span> </span><span>Senior software engineer with 8+ years of experience designing and</span><span>&hellip; (rest of the About paragraph)</span><span> </span><span class="hit">quill-kv | Embedded storage</span><span class="hit">engine .................. 2022 – Present</span><span> </span><span>Experience</span></pre>
+      <p class="cap">The right column&rsquo;s first heading and entry (highlighted)
       come out next to About, level with it at the top of the page, so an ATS would
-      see Skills before Experience. These are all nine of poppler&rsquo;s
+      see a project before any experience. These are all four of poppler&rsquo;s
       out-of-order phrases; every other section keeps its order.</p>
     </figure>
   </div>
 
   <p><b>Discussion.</b> In both one-column variants every engine returns the body in
-  document order, so order is a problem only in two columns. There, the seven
-  engines that output text as stored (<code>poppler-raw</code>, <code>mupdf</code>,
+  document order, so order is a problem only in two columns. There, the eleven
+  engines that output text as stored or as tagged keep a perfect 1.00: the seven
+  that output the stored text (<code>poppler-raw</code>, <code>mupdf</code>,
   <code>pdfium</code>, both <code>pdf.js</code> builds, <code>pdfbox</code>,
-  <code>tika</code>) keep a perfect 1.00, because the template stores each column as
-  one continuous block. The engines that re-sort text by position depart from it to
-  different degrees: <code>pdfminer</code> still reaches 1.00, <code>poppler</code>
-  moves one block (0.86), and the three side-by-side engines also scramble what
-  they recover (0.71).</p>
+  <code>tika</code>) because the template stores each column as one continuous
+  block, and the four tag readers because the tags declare that same order. The
+  engines that re-sort text by position depart from it to different degrees:
+  <code>pdfminer</code> still reaches 1.00, <code>poppler</code> moves one block
+  (0.95), and the three side-by-side engines also scramble what they recover
+  (0.55&ndash;0.57).</p>
+  <p><b>Two columns on one page.</b> The tags and the stored text agree in
+  <code>2c1p</code> because it fits on one page. In a two-column résumé that runs on
+  to a second page, the tags finish the column that continues before starting the
+  other, while the stored text, pdf.js and Tika take page 1 and then page 2; the
+  test holds the tag readers strictly and fails such a document. A two-column résumé
+  is meant to fit on one page.</p>
 </section>
 
 <section>
@@ -482,49 +601,50 @@ li::marker{color:var(--ink-3)}
     <thead><tr><th scope="col">Test</th><th scope="col">Passes in all three?</th>
       <th scope="col">Where variants differ</th></tr></thead>
     <tbody>
-      <tr class="ok"><th>real word spaces</th><td><span class="chip ok">yes</span></td><td>no difference: 770 / 557 / 552 real space characters</td></tr>
-      <tr class="ok"><th>word-gap characters</th><td><span class="chip mute">report</span></td><td>no difference: U+0020 only, 13 of 13 engines</td></tr>
-      <tr class="ok"><th>icons as whitespace</th><td><span class="chip ok">yes</span></td><td>no difference: 6 of 6 icons in each</td></tr>
+      <tr class="ok"><th>real word spaces</th><td><span class="chip ok">yes</span></td><td>no difference: 725 / 460 / 493 real space characters</td></tr>
+      <tr class="ok"><th>word-gap characters</th><td><span class="chip mute">report</span></td><td>no difference: U+0020 only, 17 of 17 engines</td></tr>
+      <tr class="ok"><th>icons as whitespace</th><td><span class="chip ok">yes</span></td><td>no difference: 8 / 7 / 7 icon glyphs, all as spaces</td></tr>
       <tr class="ok"><th>PDF/A-2B</th><td><span class="chip ok">yes</span></td><td>no difference</td></tr>
-      <tr class="warn"><th>text extraction</th><td><span class="chip ok">yes</span></td><td><code>2c1p</code>: 3 side-by-side engines lose 23&ndash;24 phrases (advisory); Tesseract misses 13 / 6 / 8 everywhere (advisory)</td></tr>
-      <tr class="warn"><th>reading order</th><td><span class="chip ok">yes</span></td><td><code>2c1p</code>: 4 position-sorting engines at 0.71&ndash;0.86 (advisory); <code>1c1p</code>: poppler moves LinkedIn in the header (reported)</td></tr>
+      <tr class="ok"><th>PDF/UA-1</th><td><span class="chip ok">yes</span></td><td>no difference: every link described, every image with alternative text</td></tr>
+      <tr class="ok"><th>XMP metadata</th><td><span class="chip ok">yes</span></td><td>no difference</td></tr>
+      <tr class="ok"><th>hidden text</th><td><span class="chip ok">yes</span></td><td>no difference: nothing hidden, faintest text 1.51:1</td></tr>
+      <tr class="warn"><th>text extraction</th><td><span class="chip ok">yes</span></td><td><code>2c1p</code>: 3 side-by-side engines lose 26&ndash;29 phrases (advisory); Tesseract misses 5 / 1 / 3 everywhere (advisory)</td></tr>
+      <tr class="warn"><th>reading order</th><td><span class="chip ok">yes</span></td><td><code>2c1p</code>: 4 position-sorting engines at 0.55&ndash;0.95 (advisory); <code>1c1p</code>: poppler reorders the header (reported)</td></tr>
     </tbody>
   </table></div>
   <ul>
     <li><b>Passed in all three variants:</b> every test. Real word spaces, icons,
-    PDF/A-2B, and phrase extraction and body order in every strict engine. Every
-    engine returns plain U+0020 word gaps.</li>
+    PDF/A-2B, PDF/UA-1, metadata, no hidden text, and phrase extraction and body order
+    in every strict engine. Every engine returns plain U+0020 word gaps.</li>
     <li><b>One column reads back perfectly.</b> In both one-column variants, compressed
-    or not, all twelve text-reading engines return every phrase with the body in
-    order. The only deviation is cosmetic: poppler lists LinkedIn last in the
-    compressed variant&rsquo;s header, which is reported but never fails.</li>
+    or not, all sixteen text-reading engines return every phrase with the body in
+    order. The only deviation is cosmetic: poppler lists the second contact line first
+    in the compressed variant&rsquo;s header, which is reported but never fails.</li>
+    <li><b>The tagging holds up.</b> The four engines that read the tags instead of the
+    page return every phrase of every variant in order, two columns included: the
+    résumé reads the same to a screen reader or tag-aware parser as it looks.</li>
     <li><b>Two columns is the only layout with real extraction issues.</b> Three engines
-    merge the columns and recover only 49&ndash;50 of 73 phrases. They and
+    merge the columns and recover only 60&ndash;63 of 89 phrases. They and
     <code>poppler</code> also reorder the body. An ATS using one of them would receive
-    merged columns, yet the PDF is sound: the seven engines that keep the stored order
-    read it perfectly.</li>
+    merged columns, yet the PDF is sound: the eleven engines that keep the stored or
+    tagged order read it perfectly.</li>
     <li><b>OCR errors do not depend on the layout or resolution.</b> Tesseract misreads
-    the same characters in one and two columns, at 300 and 600&nbsp;dpi alike; its miss
-    count follows the amount of text, give or take a stray character.</li>
+    the same few characters in one and two columns, and more of them at
+    600&nbsp;dpi than at 300.</li>
     <li><b>Recommendation:</b> where the ATS is unknown, submit a one-column variant.
-    Keep two columns for human readers or systems known to keep the stored text
-    order.</li>
+    Keep two columns for human readers or systems known to keep the stored or tagged
+    text order, and keep a two-column résumé to one page.</li>
   </ul>
 </section>
 
 <section>
   <h2>Limits</h2>
   <ul>
-    <li><b>Three documents, as written today.</b> The variants differ in content as
-    well as layout, so count differences partly reflect the text.</li>
     <li><b>Order is measured against the stored order</b> (read by
-    <code>poppler-raw</code>, which therefore always scores 1.00). A PDF that stored its
-    text in the wrong order would shift the reference rather than fail the test.</li>
-    <li><b>The OCR diagnosis is automatic</b>, from the first differing character after
-    the tests&rsquo; normalization; the one ambiguous case (the <code>1c1p</code> skills
-    line) was checked by hand.</li>
-    <li><b>Hosted commercial parsers cannot be measured locally.</b> Each runs one of
-    these engines, or a similar one, before its own analysis.</li>
+    <code>poppler-raw</code>, which therefore always scores 1.00). However, this
+    order is cross-checked against the tags produced by <code>itext-struct</code>.</li>
+    <li><b>Hosted commercial parsers cannot be measured locally.</b> Each runs
+    a similar or one of engines, before its own analysis.</li>
   </ul>
 </section>
 
@@ -540,13 +660,15 @@ li::marker{color:var(--ink-3)}
           <tr><th>pymupdf</th><td>1.28.2</td></tr>
           <tr><th>pypdfium2</th><td>5.13.0</td></tr>
           <tr><th>pdfminer.six</th><td>20260107</td></tr>
-          <tr><th>poppler</th><td>pdftotext 26.01.0</td></tr>
+          <tr><th>poppler</th><td>pdftotext / pdfinfo 26.01.0</td></tr>
           <tr><th>ghostscript</th><td>10.06.0</td></tr>
           <tr><th>tesseract</th><td>5.5.3</td></tr>
           <tr><th>java</th><td>OpenJDK 25.0.3</td></tr>
           <tr><th>pdfbox / tika</th><td>3.0.5 / 3.2.3</td></tr>
+          <tr><th>tika (tika-struct)</th><td>4.2.0</td></tr>
+          <tr><th>itext</th><td>9.8.0</td></tr>
           <tr><th>node</th><td>v20.18.1</td></tr>
-          <tr><th>pdf.js</th><td>2.5.207 (old), 4.10.38 (new)</td></tr>
+          <tr><th>pdf.js</th><td>2.5.207 (old), 4.10.38 (new, struct)</td></tr>
           <tr><th>veraPDF</th><td>1.30.2</td></tr>
         </tbody>
       </table></div>
@@ -556,30 +678,20 @@ li::marker{color:var(--ink-3)}
       <p>From <code>tests/</code>, one command per variant:</p>
       <div class="tbl"><table>
         <tbody>
-          <tr><th>1c2p</th><td><code>./pipeline.sh ../realizations/generic_research-1c2p/main.tex</code></td></tr>
-          <tr><th>1c1p</th><td><code>./pipeline.sh ../realizations/generic_research-1c1p/main.tex</code></td></tr>
-          <tr><th>2c1p</th><td><code>./pipeline.sh ../realizations/generic_research-2c1p/main.tex</code></td></tr>
+          <tr><th>1c2p</th><td><code>./pipeline.sh ../resources/demos/1c2p/main.tex</code></td></tr>
+          <tr><th>1c1p</th><td><code>./pipeline.sh ../resources/demos/1c1p/main.tex</code></td></tr>
+          <tr><th>2c1p</th><td><code>./pipeline.sh ../resources/demos/2c1p/main.tex</code></td></tr>
         </tbody>
       </table></div>
       <p class="cap">Each run generates <code>phrases.txt</code>, builds
       <code>&lt;label&gt;.pdf</code>, runs <code>run.sh</code> and writes
       <code>run.log</code> and <code>pipeline.json</code> to
-      <code>tests/out/generic_research-&lt;variant&gt;/</code>. The 600&nbsp;dpi
+      <code>tests/out/&lt;variant&gt;/</code>. The 600&nbsp;dpi
       pass renders each built PDF with <code>pdftoppm -r 600 -gray -png</code>, runs
       <code>tesseract</code> on every page, and scores the output with the same
       <code>check.py</code> and <code>order.py</code>.</p>
     </div>
   </div>
-  <div class="note"><b>Changes to the tests since earlier reports.</b> Phrase counts
-  here are larger than in earlier reports and not comparable with them, for two
-  reasons. Phrases are no longer deduplicated: a repeated phrase, or one inside a
-  longer phrase, is now checked at each of its places. And text before the first
-  section heading, which used to be skipped and left the About paragraph of
-  <code>1c1p</code> untested, is now checked too.</div>
-  <p class="foot">All three pipeline runs exited 0. Every figure here comes from their
-  <code>run.log</code>, <code>pipeline.json</code>, <code>order.json</code> and the 13
-  per-engine extractions. The 2c1p loss breakdown and the Tesseract diagnosis were
-  computed from those files with the tests&rsquo; own normalization.</p>
 </section>
 
 </div>
