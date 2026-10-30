@@ -505,36 +505,36 @@
 %% Sets ActualText as empty to make text-layer extractors ignore it. With
 %% tagging, the icons are set as artifacts, so tag-order readers never see it.
 %% AtualText is deliberately not nested inside the text's marked-content seq.
+%% No space char follows the icon: the preceding delimiter or line end has one.
 \newcommand{\lcv@icon}[1]{%
   \if@lcv@tagging\lcv@artifactbegin\fi
   \BeginAccSupp{method=escape,ActualText={}}#1\EndAccSupp{}%
-  \if@lcv@tagging\lcv@artifactend\pdffakespace\fi
+  \if@lcv@tagging\lcv@artifactend\fi
 }
 
 %% Header contact-field infrastructure: \CvInfoField and the fields it makes.
 %% \ExplSyntaxOn makes an ordinary space catcode 9 (IGNORED) and `~' catcode 10
-%% (a space token). The `~' in \lcv@infoicon below is therefore a real space
-%% character, which is what the ActualText and helper code expects to see.
+%% (a space token). The `~' in \lcv@infoicon below hence typesets a normal gap.
 \ExplSyntaxOn
 
-%% Extra visual gap between an icon and its value, on top of a real space char
+%% Extra visual gap between an icon and its value, on top of the `~' word gap
 \newcommand{\cvinfoicongap}{0.15em}
 
 %% The icon, or nothing under `noicons'. The ActualText is deliberately EMPTY,
 %% so the glyph extracts as nothing. An icon means nothing to a parser, so its
 %% value must be complete -- write `linkedin.com/in/your_id', not a `your_id'.
-%% The `~' is a real space character; \cvinfoicongap adds additional visual gap
+%% Visual gap only: the kern (unlike glue) makes tagpdf add no extra space char
 \NewDocumentCommand{\lcv@infoicon}{m}{%
   \if@lcv@icons
     \textcolor{accent}{\lcv@icon{\normalfont #1}}%
-    ~\hspace{\cvinfoicongap}%
+    ~\kern\dimexpr\cvinfoicongap\relax
   \fi
 }
 \ExplSyntaxOff
 
 %% Gap between two contact items in the `icons' mode.
 \newcommand{\cvinfosepamount}{0.75em}
-\newcommand{\cvinfosep}{\hspace{\cvinfosepamount}}
+\newcommand{\cvinfosep}{\kern\dimexpr\cvinfosepamount\relax}
 
 %% Flags read by \lcv@infodelim for preventing stray delimiters.
 %% 1) Is \makecvheader typesetting the contact block right now?
@@ -576,11 +576,6 @@
     \global\@lcv@infoseentrue
   \fi
 }
-
-%% \lcv@refsymbol definition
-%% Arguments: #1 = symbol
-%% Reference icon symbols, substituting an empty string for ATS parsing
-\NewDocumentCommand{\lcv@refsymbol}{m}{\lcv@icon{#1}}
 
 %% \lcv@infoplain and \lcv@infolinked definitions -- contact item typesetting
 %% Kept as plain macros so the expl3 layer can hand them expanded arguments.
@@ -1791,7 +1786,7 @@
 \newcommand{\lcv@refline}[2]{%
   \par\noindent
   \hangindent=\cvrefindent\hangafter=1  % 1st line full-width, others indented
-  \makebox[\cvrefindent][l]{\small\normalfont\color{accent}\lcv@refsymbol{#1}}%
+  \makebox[\cvrefindent][l]{\small\normalfont\color{accent}\lcv@icon{#1}}%
   #2\par
 }
 
