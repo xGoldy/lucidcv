@@ -2,7 +2,7 @@
 """How much of the document comes back in document ORDER, per engine.
 
 Author: Patrik Goldschmidt
-Date: 2026-08-23, last rev. 2026-10-04
+Date: 2026-08-23, last rev. 2026-10-30
 
 check.py asks whether a phrase survived. That is the wrong question for a CV:
 an engine can return every phrase and still hand a parser the dates under the
@@ -21,8 +21,21 @@ common.py).
 
 Because the reference IS the content stream, poppler-raw scores 1.00 by
 construction, and an edit that scrambled the stream would move the target
-rather than fail the test. It matches the body section for section today; a
-declared order list would close that gap and has not been written.
+rather than fail the test. It matches the body section for section today.
+
+TWO REFERENCES. The structure-tree engines (STRUCT_ENGINES in common.py) do
+not read the content stream at all: they write the order the tags declare.
+They are scored against the TAG order, taken from itext-struct, which walks
+the whole tree from its root and so scores 1.00 there by construction -- and
+itext-struct is itself scored against the content stream. The two orders
+must agree, so it is held to 1.00, and that is what closes the gap above: a
+scrambled stream no longer moves both targets at once.
+
+All four are strict in every layout, which holds a two-column CV to one page.
+On one page the tag order, the stream, and the page-by-page reading of
+pdfjs-struct and tika-struct all coincide. Once a column runs on to a second
+page they part: the tags finish that column before starting the other, while
+the stream, pdf.js and Tika take page 1 and then page 2 -- and the run fails.
 
 HEADER vs BODY. The contact block is a bag of independent fields -- an e-mail
 address means the same thing whether it comes before or after a phone number,
@@ -53,13 +66,27 @@ import sys
 # on the path unless we put it there.
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from common import (ENGINES, ORDER_ADVISORY, load_phrases, locate, norm,
-                    read_extractions)
+from common import (ENGINES, ORDER_ADVISORY, STRUCT_ENGINES, load_phrases,
+                    locate, norm, read_extractions)
 
 
 #: The engine whose output defines document order: it emits the content stream
 #: without re-sorting, so it scores 1.00 by construction. See the docstring.
 REFERENCE = "poppler-raw"
+
+#: The engine whose output defines TAG order, for the other structure-tree
+#: engines. It has to walk the whole tree, not one page's share of it, as
+#: poppler-struct also does; poppler-struct's text depends on how the class
+#: nests marked content, which it has once got wrong. See the docstring.
+TAG_REFERENCE = "itext-struct"
+
+
+def reference_of(engine):
+    """The engine another engine's order is measured against."""
+    if engine in STRUCT_ENGINES and engine != TAG_REFERENCE:
+        return TAG_REFERENCE
+
+    return REFERENCE
 
 
 def sequence(located, keys):
@@ -81,25 +108,32 @@ def lcs_length(a, b):
     return row[-1]
 
 
-def fidelity(located, ref_seq, keys):
-    """Per-engine {in_order, compared, fidelity} over one phrase group.
+def fidelity(located, keys):
+    """Per-engine {reference, in_order, compared, fidelity} over one group.
 
-    `compared' is how many occurrences the engine and the reference both
+    `compared' is how many occurrences the engine and its reference both
     returned -- the most that could be in order -- and `in_order' how many of
-    those arrive in the reference's sequence.
+    those arrive in the reference's sequence. A structure-tree engine without
+    its tag reference is left out: measured against the content stream
+    instead, it would fail every two-column build for following the tags.
     """
-    ref_count = collections.Counter(ref_seq)
+    ref_seqs = {ref: sequence(located[ref], keys)
+                for ref in (REFERENCE, TAG_REFERENCE) if ref in located}
     scores = {}
 
     for engine in ENGINES:
-        if engine not in located:
+        ref = reference_of(engine)
+
+        if engine not in located or ref not in ref_seqs:
             continue
 
         seq = sequence(located[engine], keys)
+        ref_count = collections.Counter(ref_seqs[ref])
         compared = sum(min(n, ref_count[k])
                        for k, n in collections.Counter(seq).items())
-        in_order = lcs_length(ref_seq, seq)
+        in_order = lcs_length(ref_seqs[ref], seq)
         scores[engine] = {
+            "reference": ref,
             "in_order": in_order,
             "compared": compared,
             "fidelity": round(in_order / compared, 4) if compared else None,
@@ -132,11 +166,12 @@ def main(outdir, variant, phrase_file):
 
     for name, group in (("body", phrases.body), ("header", phrases.header)):
         keys = {norm(p) for p in group} - {""}
-        groups[name] = fidelity(located, sequence(located[REFERENCE], keys), keys)
+        groups[name] = fidelity(located, keys)
 
     # ---- The table ----------------------------------------------------------
     w = max(len(e) for e in groups["body"])
-    print(f"{'ENGINE':<{w}}   BODY  IN ORDER / COMPARED   HEADER  RESULT  ({variant})")
+    print(f"{'ENGINE':<{w}}   BODY  IN ORDER / COMPARED   HEADER  "
+          f"AGAINST  RESULT  ({variant})")
 
     fails = {}
 
@@ -148,6 +183,7 @@ def main(outdir, variant, phrase_file):
         h = groups["header"].get(engine, {"fidelity": None})
         bf = b["fidelity"]
         hf = h["fidelity"]
+        against = "tags" if b["reference"] == TAG_REFERENCE else "stream"
 
         if engine in advisory:
             note = "advisory"
@@ -159,13 +195,21 @@ def main(outdir, variant, phrase_file):
 
         print(f"{engine:<{w}}  {('n/a' if bf is None else f'{bf:.2f}'):>5}  "
               f"{b['in_order']:>8} / {b['compared']:<9} "
-              f"{('n/a' if hf is None else f'{hf:.2f}'):>5}  {note}")
+              f"{('n/a' if hf is None else f'{hf:.2f}'):>5}  {against:<7}  {note}")
 
     print(f"\nBody = the file main.tex inputs, scored strictly. Header = the contact "
-          f"block, reported only.")
+          f"block, reported only.\nAgainst = the reference: {REFERENCE}'s content "
+          f"stream, or {TAG_REFERENCE}'s tag order for the structure-tree engines.")
+
+    skipped = sorted(STRUCT_ENGINES & texts.keys() - groups["body"].keys())
+
+    if skipped:
+        print(f"Not scored: {', '.join(skipped)} -- no {TAG_REFERENCE}.txt, "
+              f"which is the tag order they are measured against.")
 
     (out / "order.json").write_text(json.dumps(
         {"variant": variant, "reference": REFERENCE,
+         "tag_reference": TAG_REFERENCE,
          "advisory": sorted(advisory),
          "body": groups["body"], "header": groups["header"]},
         indent=1), encoding="utf-8")

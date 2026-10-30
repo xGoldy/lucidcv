@@ -2,7 +2,7 @@
 """Read a PDF back with every text extractor available on this machine.
 
 Author: Patrik Goldschmidt
-Date: 2026-08-20, last rev. 2026-10-05
+Date: 2026-08-20, last rev. 2026-10-30
 
 Writes one <engine>.txt per engine into the output directory; check.py scores
 them. Engines that are not installed are skipped with a note rather than
@@ -37,6 +37,20 @@ The engines, and why each one is here:
                    ATS falls back to when a PDF has no usable text layer, and
                    the only engine here that never reads one.
 
+Four more read the STRUCTURE TREE instead of the page: they write the text the
+tags reference, in the order the tags declare, so neither the geometry nor the
+content-stream order decides what comes out, and artifacts never do.
+
+  poppler-struct   pdfinfo -struct-text, poppler's dump of the tagged tree
+  pdfjs-struct     current pdf.js's getStructTree(), what Firefox gives a
+                   screen reader. Needs ./setup.sh.
+  tika-struct      Tika 4 with the structure tree forced on (strategy TAGS);
+                   PDFBox underneath, but a tree walk of Tika's own. Needs
+                   ./setup.sh.
+  itext-struct     iText's TaggedPdfReaderTool -- a third PDF implementation,
+                   beside poppler and PDFBox. Needs ./setup.sh and a JDK's
+                   jdk.compiler module.
+
 Not covered: the commercial resume parsers (Sovren, Daxtra, HireAbility and
 friends). They are hosted, paid and rate-limited, so no local test can exercise
 them -- but they extract with one of the engines above before their own
@@ -44,7 +58,9 @@ semantic pass runs, so what is checked here is the half that can be checked.
 """
 
 import concurrent.futures
+import html
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -55,7 +71,20 @@ from common import ENGINES, ENV_DIR
 
 PDFJS_DIR = ENV_DIR / "pdfjs"
 PDFJS_VENDOR = PDFJS_DIR / "vendor"
-JAVA_VENDOR = ENV_DIR / "java" / "vendor"
+JAVA_DIR = ENV_DIR / "java"
+JAVA_VENDOR = JAVA_DIR / "vendor"
+
+#: One element line of `pdfinfo -struct-text': its type after the role map,
+#: an ID, the alt text of a Figure, and whether poppler counts it as inline.
+POPPLER_ELEMENT = re.compile(
+    r"^\S+(?: <[^>]*>)?(?: \[.*\])?(?: \((block|inline)\))?:?$")
+
+#: The standard inline-level structure types (ISO 32000-1, 14.8.4.4). Text in
+#: one of them continues the line; every other element starts one. The same
+#: set as in setup.sh's extract-struct.mjs.
+INLINE_TYPES = {"Span", "Quote", "Note", "Reference", "BibEntry", "Code",
+                "Link", "Annot", "Ruby", "RB", "RT", "RP", "Warichu", "WT",
+                "WP", "Lbl", "Em", "Strong", "Sub"}
 
 #: Engines that run inside this interpreter rather than as a subprocess. They
 #: stay on the main thread: pdfium is not safe to call from a second thread.
@@ -75,6 +104,15 @@ def get_jar_path(name):
     jar = JAVA_VENDOR / name
 
     return str(jar) if jar.exists() else None
+
+
+def get_itext_classpath():
+    """Return the class path of the iText driver, or None if absent."""
+    jars = JAVA_VENDOR / "itext"
+    driver = JAVA_DIR / "ItextStruct.java"
+
+    return f"{jars}/*" if (jars / "kernel.jar").exists() and driver.exists() \
+        else None
 
 
 # Neither helper reports success: main() checks the file each engine left
@@ -155,6 +193,72 @@ def tesseract(pdf, out):
 
     out.write_text(text, encoding="utf-8")
 
+
+def poppler_struct(pdf, out):
+    """Rebuild the text of `pdfinfo -struct-text', poppler's tagged-tree dump.
+
+    Each line is an element, one of its attributes (`/TextAlign /Start'), an
+    annotation it references (`Object 26 0'), or a quoted run of its content.
+    The runs are written in tree order, and every element poppler does not
+    mark inline starts a line -- so a link continues its paragraph while a
+    heading never fuses with the paragraph after it.
+    """
+    r = subprocess.run(["pdfinfo", "-struct-text", str(pdf)], check=True,
+                       stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    text = []
+
+    for line in r.stdout.decode("utf-8").splitlines():
+        s = line.strip()
+
+        if len(s) >= 2 and s[0] == s[-1] == '"':
+            text.append(s[1:-1])
+        elif s.startswith("/") or s.startswith("Object "):
+            continue
+        else:
+            m = POPPLER_ELEMENT.match(s)
+
+            if m and m.group(1) != "inline":
+                text.append("\n")
+
+    out.write_text("".join(text), encoding="utf-8")
+
+
+def itext_struct(java, classpath, pdf, out):
+    """Strip TaggedPdfReaderTool's XML down to the text it carries.
+
+    The tool ends every tag with a line break, inline ones included, so taken
+    as it stands `<Em>' cuts `Databases' from its full stop. Those breaks are
+    the dump's layout, not the document's: each tag goes with the break after
+    it, and a block element -- its type resolved through the role map the
+    driver prints first -- leaves one line break in its place. A Figure's
+    <alt> goes too: it describes an image, which no other engine returns
+    either, and iText writes it with the UTF-16 byte-order mark decoded as two
+    Latin-1 characters.
+    """
+    r = subprocess.run([java, "-cp", classpath,
+                        str(JAVA_DIR / "ItextStruct.java"), str(pdf)],
+                       check=True, stdout=subprocess.PIPE,
+                       stderr=subprocess.DEVNULL)
+    xml = r.stdout.decode("utf-8")
+    roles = dict(re.findall(r"<!-- role (\S+) (\S+) -->", xml))
+
+    def standard(tag):
+        seen = set()
+
+        while tag in roles and tag not in seen:
+            seen.add(tag)
+            tag = roles[tag]
+
+        return tag
+
+    xml = re.sub(r"<!--.*?-->\r?\n?", "", xml, flags=re.S)
+    xml = re.sub(r"<alt>.*?</alt>\r?\n?", "", xml, flags=re.S)
+    text = re.sub(r"</?([^\s/>]+)[^>]*>\r?\n?",
+                  lambda m: "" if standard(m.group(1)) in INLINE_TYPES else "\n",
+                  xml)
+
+    out.write_text(html.unescape(text), encoding="utf-8")
+
 def attempt(fn, pdf, target):
     """Run one engine. None if it wrote text, else why it was skipped.
 
@@ -198,6 +302,8 @@ def main(pdf, outdir):
     node = get_node_bin_path()
     pdfbox_jar = get_jar_path("pdfbox-app.jar")
     tika_jar = get_jar_path("tika-app.jar")
+    tika_struct_jar = get_jar_path("tika-struct/tika-app.jar")
+    itext_cp = get_itext_classpath()
     java = shutil.which("java")
     engines = []
 
@@ -212,6 +318,9 @@ def main(pdf, outdir):
                 ["pdftotext", "-layout", str(pdf), str(out)])),
         ]
 
+    if shutil.which("pdfinfo"):
+        engines.append(("poppler-struct", poppler_struct))
+
     if shutil.which("gs"):
         engines.append(("ghostscript", lambda pdf, out: run(
             ["gs", "-q", "-dNOPAUSE", "-dBATCH", "-sDEVICE=txtwrite",
@@ -224,6 +333,8 @@ def main(pdf, outdir):
                 [node, str(PDFJS_DIR / "extract-old.cjs"), str(pdf)], out)),
             ("pdfjs-new", lambda pdf, out: capture(
                 [node, str(PDFJS_DIR / "extract-new.mjs"), str(pdf)], out)),
+            ("pdfjs-struct", lambda pdf, out: capture(
+                [node, str(PDFJS_DIR / "extract-struct.mjs"), str(pdf)], out)),
         ]
 
     # Initialize engines -- PDFBox and Tika are jars needing a JRE on PATH
@@ -240,6 +351,17 @@ def main(pdf, outdir):
     if java and tika_jar:
         engines.append(("tika", lambda pdf, out: capture(
             [java, "-jar", tika_jar, "--text", str(pdf)], out)))
+
+    # Initialize engines -- the two JVM structure-tree readers
+    if java and tika_struct_jar:
+        engines.append(("tika-struct", lambda pdf, out: capture(
+            [java, "-jar", tika_struct_jar,
+             f"--config={JAVA_DIR / 'tika-struct.json'}", "--text", str(pdf)],
+            out)))
+
+    if java and itext_cp:
+        engines.append(("itext-struct", lambda pdf, out: itext_struct(
+            java, itext_cp, pdf, out)))
 
     # Initialize engines -- OCR needs both the renderer and Tesseract itself
     if shutil.which("pdftoppm") and shutil.which("tesseract"):
@@ -282,9 +404,10 @@ def main(pdf, outdir):
         ("pdftotext", "poppler-utils" if not shutil.which("pdftotext") else None),
         ("gs", "ghostscript" if not shutil.which("gs") else None),
         ("node", "run tests/setup.sh" if not node else None),
-        ("java", "install a JRE 11+" if not java else None),
-        ("pdfbox-app.jar / tika-app.jar",
-         "run tests/setup.sh" if java and not (pdfbox_jar and tika_jar)
+        ("java", "install a JRE 17+" if not java else None),
+        ("pdfbox-app.jar / tika-app.jar / Tika 4 / iText",
+         "run tests/setup.sh" if java and not (pdfbox_jar and tika_jar and
+                                               tika_struct_jar and itext_cp)
          else None),
         ("tesseract", "tesseract-ocr" if not shutil.which("tesseract") else None),
     ]:

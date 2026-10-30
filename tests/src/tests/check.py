@@ -2,7 +2,7 @@
 """Score extracted text against the visible phrases of the document.
 
 Author: Patrik Goldschmidt
-Date: 2026-08-20, last rev. 2026-10-04
+Date: 2026-08-20, last rev. 2026-10-30
 
 Reads the .txt files written by extract.py and reports, per engine, how many of
 the document's phrases survived extraction. run.sh calls it as
@@ -105,8 +105,8 @@ def main(outdir, variant, phrase_file):
 
     # ---- The verdict ---------------------------------------------------------
     if fails:
-        print(f"\nFAIL: {', '.join(sorted(fails))} lost phrases that geometry-based "
-              f"extraction should preserve.")
+        print(f"\nFAIL: {', '.join(sorted(fails))} lost phrases that a strict "
+              f"engine has to return.")
         return 1
 
     print(f"\nPASS: every strict engine returned all {total} phrases.")

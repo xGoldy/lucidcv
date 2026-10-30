@@ -72,6 +72,18 @@ document's own freshly generated list.
 ./pipeline.sh ../main.tex --opt twocolumn --opt compressed # twocolumn-compr
 ```
 
+A two-column build is held to **one page**: the structure-tree engines are
+strict on order, and past one page the tag order and the page order part (see
+*`order.py`* below). The root sample is two pages long in both two-column
+builds, so those two commands fail on reading order by design. The documents
+in `../resources/demos/` cover the layouts at a length each one fits:
+
+```sh
+./pipeline.sh ../resources/demos/1c2p/main.tex   # onecolumn, two pages
+./pipeline.sh ../resources/demos/1c1p/main.tex   # onecolumn-compr, one page
+./pipeline.sh ../resources/demos/2c1p/main.tex   # twocolumn-compr, one page
+```
+
 `pipeline.json` holds every figure the run produced — options, variant, page
 and phrase counts, each gate's verdict (`pass`, `fail`, `skipped` or `report`),
 per-engine coverage and `order.py`'s scores — as the raw material for a
@@ -376,11 +388,30 @@ rather than distinct phrases, so a phrase listed twice is placed twice. 1.00 is
 the document's order; on the two-column sample (`2c1p`), the engines that sort
 by position score between 0.71 and 0.86.
 
-One caveat worth knowing: because the reference *is* the content stream,
-`poppler-raw` scores 1.00 by construction, and an edit that scrambled the stream
-would move the target rather than fail the test. Today the content stream
-follows the body section by section. A declared order list, cross-checked
-against `poppler-raw`, would close that gap and has not been written.
+Because the reference *is* the content stream, `poppler-raw` scores 1.00 by
+construction, and on its own an edit that scrambled the stream would move the
+target rather than fail the test. The structure-tree engines close that gap.
+
+**Two references.** The four `-struct` engines (see *Structure-tree engines*
+below) never read the content stream: they write the order the tags declare.
+So they are scored against the **tag order**, taken from `itext-struct`, which
+walks the whole tree from its root and scores 1.00 there by construction. In
+turn, `itext-struct` is scored against the content stream:
+
+* In `onecolumn` the two orders have to agree, and `itext-struct` is held to
+  1.00 against `poppler-raw`. An edit that scrambled the stream would now fail
+  here, because the tags do not move with it.
+* In `twocolumn` they agree only while the document fits on **one page**, and
+  the suite holds them to that: all four tree readers are strict on order in
+  every layout. Once a column runs on to a second page, the tags finish that
+  column before the other column starts, while the stream draws page 1 and
+  then page 2. Built with `--opt twocolumn`, the root sample's left column
+  carries *Open-Source Projects* over to page 2: the tags put it third, after
+  *Experience*, the stream seventh, and the run fails. A two-column CV is meant
+  to fit on one page; test that layout with a document that does, such as
+  `../resources/demos/2c1p/main.tex`.
+
+The `AGAINST` column says which reference a row was measured against.
 
 It scores the **body and the header separately**, and the split is taken from
 the phrase file's own section comments — the group under `# header / contact` is
@@ -394,8 +425,11 @@ the header — so the two cannot drift apart from the list they describe.
   legitimately disagree about how to serialize a row of icons.
 
 ```text
-ENGINE            BODY  IN ORDER / COMPARED   HEADER  RESULT  (twocolumn)
-poppler-raw       1.00        65 / 65           1.00  in order
+ENGINE           BODY  IN ORDER / COMPARED   HEADER  AGAINST  RESULT  (twocolumn-compr)
+poppler-raw      1.00        82 / 82         1.00  stream   in order
+poppler-struct   1.00        81 / 81         1.00  tags     in order
+pdfjs-struct     1.00        82 / 82         1.00  tags     in order
+itext-struct     1.00        82 / 82         1.00  stream   in order
 ```
 
 A drop in an engine that normally reports 1.00 is the signal worth acting on.
@@ -424,7 +458,7 @@ failed on — none of them is a hard dependency. The engines are independent, so
 the external ones run concurrently and Tesseract reads the pages concurrently;
 the three Python libraries run in the main process, one after another.
 
-There are 9 extraction engines, run in 13 configurations. Throughout this file,
+There are 10 extraction engines, run in 17 configurations. Throughout this file,
 "engine" means one configuration, as named in the first column:
 
 | Engine | Is |
@@ -432,25 +466,86 @@ There are 9 extraction engines, run in 13 configurations. Throughout this file,
 | `poppler` | `pdftotext`, default mode — widely used in Linux tooling (Okular, for one) and PDF-processing pipelines |
 | `poppler-raw` | the same, in content-stream order |
 | `poppler-layout` | the same, preserving the physical page layout |
+| `poppler-struct` | `pdfinfo -struct-text` — poppler's dump of the structure tree, with each element's text |
 | `mupdf` | PyMuPDF, an independent implementation |
 | `pdfium` | pypdfium2 — the engine of Chromium-based browsers |
 | `pdfminer` | pdfminer.six — a Python library commonly used in custom document-processing pipelines |
 | `ghostscript` | `txtwrite`, the strictest word-gap heuristic of the set |
 | `pdfjs-old` | pdf.js 2.5.207, representative of older pdf.js integrations |
 | `pdfjs-new` | current pdf.js, as used by Firefox (pinned by `setup.sh`, currently 4.10.38) |
+| `pdfjs-struct` | the same pdf.js through `getStructTree()` — what Firefox gives a screen reader |
 | `pdfbox` | Apache PDFBox, default mode — widely used in Java-based document-processing pipelines |
 | `pdfbox-sorted` | the same, in position-sorting mode (`-sort`) |
 | `tika` | Apache Tika — delegates PDFs to PDFBox, so this checks Tika's *defaults*, not a second implementation |
+| `tika-struct` | Apache Tika 4 with the structure tree forced on — PDFBox's glyphs, Tika's own walk of the tags |
+| `itext-struct` | iText's `TaggedPdfReaderTool` — a third PDF implementation beside poppler and PDFBox |
 | `tesseract` | OCR of the rendered pages — what an ATS falls back to when the text layer is unavailable or unusable |
 
 Commercial resume parsers (Textkernel/Sovren, Daxtra, HireAbility, etc.) are
 proprietary, and their PDF-processing pipelines cannot be reproduced locally, so
 the suite **does not guarantee compatibility with any particular commercial
 ATS**. Every parser, however, has to get the text out of the PDF before it can
-analyze it. Consistent extraction across these 13 configurations, OCR included,
+analyze it. Consistent extraction across these 17 configurations, OCR included,
 is evidence that the PDF's content is robustly machine-readable, and a useful
 indication that other extractors will read it correctly too — most strongly for
-one-column builds, which every text-layer engine returns completely and in order.
+one-column builds, which every text-layer engine returns completely and in
+order.
+
+### Structure-tree engines
+
+Thirteen of the configurations read the **page**: glyphs and their positions,
+in content-stream order or re-sorted by geometry. The four `-struct` engines
+read the **tags**. They walk the structure tree, look up the marked content
+each element references, and write it in the order the tree declares. Nothing
+the tree does not reference comes out — artifacts such as the date leader's
+dots and the heading rules, or text nobody tagged. This is what screen readers
+and tag-aware parsers consume, and it is the only way to test the tagging
+itself rather than only its side effects (the real space glyphs, the empty
+ActualText on icons).
+
+| Engine | Walks | Its own quirks, handled by its driver |
+| --- | --- | --- |
+| `poppler-struct` | the whole tree | `pdfinfo -struct-text` prints a tree dump, not text; `extract.py` writes each quoted run in order and breaks a line at every element poppler does not mark `(inline)` |
+| `pdfjs-struct` | one page at a time | `getStructTree()` returns only the tree's shape and content ids; `extract-struct.mjs` joins it with `getTextContent({includeMarkedContent: true})` and breaks lines at block-level elements |
+| `tika-struct` | one page at a time | Tika 4's default `AUTO` strategy falls back to the plain stripper on any page whose tags it distrusts, which would quietly turn this back into `tika`; `tika-struct.json` sets `TAGS` and turns OCR off |
+| `itext-struct` | the whole tree | `TaggedPdfReaderTool` writes an XML dump. The driver drops the `/Link` it writes for every annotation reference, `extract.py` drops the line break it writes after every tag, inline ones included, and a Figure's `<alt>` is left out like every other engine leaves it out |
+
+All four strip the tree down to text in the same way: inline-level elements
+(`Span`, `Link`, `Em`, `Lbl`, …, after the role map) continue the line, and
+every other element starts one, so a heading never fuses with the paragraph
+that follows it.
+
+What they found on the sample in all four layouts, and on the three documents
+in `../resources/demos/`:
+
+* **Coverage.** All four return every phrase, in two columns too. Since
+  nothing untagged reaches them, that is also a check that every visible
+  phrase is tagged.
+* **Tag order.** `poppler-struct` and `itext-struct`, the two whole-tree
+  readers, agree exactly everywhere. On one page — every demo, `2c1p` included
+  — all four agree exactly with the content stream.
+* **`poppler-struct` caught a nesting problem, now fixed in the class.**
+  Poppler's tagged-text reader pushes a marked-content sequence only if it has
+  an MCID, but pops at every `EMC`. The class used to nest each icon's
+  empty-ActualText span inside the text around it, so the span's `EMC` ended
+  that text early, and everything after the icon was lost: the header's
+  location and citizenship, and each referee's e-mail and affiliation (6 of
+  111). The nesting is legal (ISO 32000-1, 14.6) and the other three read it,
+  but icons are decoration, so the class now draws each one as an artifact
+  between two text sequences. See *Copy-paste fidelity* in
+  [`../resources/docs.md`](../resources/docs.md#copy-paste-fidelity).
+* **Page-by-page readers return the pages in turn.** pdf.js and Tika rebuild
+  the tree per page, so on a two-page `twocolumn` build they finish page 1,
+  both columns, before page 2 — the stream's order rather than the tags'. On
+  the root sample built that way they score 0.85–0.87 against the tags, and the
+  run fails; see `order.py` above.
+
+**Tika 3 cannot do this at all.** Its marked-content mode
+(`extractMarkedContent`) only follows a structure element's `/K` when it is a
+bare MCID integer. LaTeX writes every reference as an `/MCR` dictionary, so
+Tika 3.2.3 matched none of them, emitted the whole tree empty, and dumped the
+text afterwards as orphans in hash order. Tika 4 rewrote that walk, which is
+why `tika-struct` pins Tika 4 while `tika` stays on 3.
 
 ### Strict and advisory
 
@@ -496,23 +591,30 @@ about one and not the other. For `twocolumn`:
 | `poppler` | **strict** | advisory |
 | `poppler-raw` | **strict** | **strict** |
 | `poppler-layout` | advisory | advisory |
+| `poppler-struct` | **strict** | **strict** |
 | `mupdf` | **strict** | **strict** |
 | `pdfium` | **strict** | **strict** |
 | `pdfminer` | **strict** | advisory |
 | `ghostscript` | advisory | advisory |
 | `pdfjs-old` | **strict** | **strict** |
 | `pdfjs-new` | **strict** | **strict** |
+| `pdfjs-struct` | **strict** | **strict** |
 | `pdfbox` | **strict** | **strict** |
 | `pdfbox-sorted` | advisory | advisory |
 | `tika` | **strict** | **strict** |
+| `tika-struct` | **strict** | **strict** |
+| `itext-struct` | **strict** | **strict** |
 | `tesseract` | advisory | advisory |
 
 `poppler` and `pdfjs-old` also sort by position, but both measurably return the
 full count in two columns, so they are strict on **coverage** there; only
 `poppler`'s reading *order* suffers. `pdfminer` likewise recovers every phrase,
-so it is strict on coverage and advisory on order. In `onecolumn` every engine
-except `tesseract` is strict on both counts. The two `-compr` variants carry the
-same sets as their plain twins.
+so it is strict on coverage and advisory on order. The four tree readers are
+strict on both counts in every layout: two columns cannot split a phrase for
+an engine that never looks at where it is drawn, and on one page they cannot
+reorder one either. In `onecolumn` every engine except `tesseract` is strict
+on both counts. The two `-compr` variants carry the same sets as their plain
+twins.
 
 **Ghostscript used to fail in both layouts.** Before the move to LuaLaTeX it
 lost five more phrases to word-gap fusion, which no layout could fix and no
@@ -602,8 +704,11 @@ tests/
   env/                      built by setup.sh, ignored by git, disposable
     python/                 virtualenv holding PyMuPDF, pypdfium2, pdfminer.six
     pdfjs/vendor/           a Node runtime and both pdf.js builds
-    pdfjs/extract-*.{cjs,mjs}  the two drivers, written out by setup.sh
-    java/vendor/            the PDFBox and Tika jars
+    pdfjs/extract-*.{cjs,mjs}  the three drivers, written out by setup.sh
+    java/vendor/            the PDFBox and Tika jars; tika-struct/, Tika 4 with
+                            its lib/; itext/, the iText kernel and what it needs
+    java/tika-struct.json   tika-struct's configuration, written out by setup.sh
+    java/ItextStruct.java   itext-struct's driver, written out by setup.sh
     verapdf/vendor/         the veraPDF validator
   out/
     <label>/                one run of pipeline.sh: <label>.pdf, phrases.txt,
@@ -612,8 +717,9 @@ tests/
 ```
 
 Nothing under `env/` is tracked, because `setup.sh` reconstructs all of it —
-the two pdf.js driver scripts included, which is why they are written from
-heredocs in that script rather than kept as files. Delete `env/` and re-run
+the three pdf.js drivers, the Tika configuration and the iText driver included,
+which is why they are written from heredocs in that script rather than kept as
+files. Delete `env/` and re-run
 `./setup.sh` to repair it; delete one engine's directory and only that engine
 goes, reported as *not run* rather than failing the suite.
 
@@ -723,21 +829,29 @@ pipeline, where every advisory score was different.
 
 | Stage | Gets | Needs root |
 | --- | --- | --- |
-| system | poppler, Ghostscript, Tesseract, a JRE, and the `curl`/`unzip`/`xz`/venv tooling the rest of the script uses — through `apt-get` on Debian-family distributions (`poppler-utils`, `ghostscript`, `tesseract-ocr`, `default-jre`, …) or `dnf` on Fedora-family ones (`poppler-utils`, `ghostscript`, `tesseract`, `java-latest-openjdk-headless`, …), picked from `/etc/os-release` | yes — via `sudo`, or skip it with `--no-system` |
+| system | poppler, Ghostscript, Tesseract, a Java runtime, and the `curl`/`unzip`/`xz`/venv tooling the rest of the script uses — through `apt-get` on Debian-family distributions (`poppler-utils`, `ghostscript`, `tesseract-ocr`, `default-jre`, `default-jdk-headless`, …) or `dnf` on Fedora-family ones (`poppler-utils`, `ghostscript`, `tesseract`, `java-latest-openjdk-headless`, …), picked from `/etc/os-release` | yes — via `sudo`, or skip it with `--no-system` |
 | venv | `env/python/`, with PyMuPDF, pypdfium2 and pdfminer.six pip-installed into it | no |
-| pdfjs | a Node runtime, both pdf.js builds, and the two driver scripts | no |
-| java | the PDFBox and Tika jars | no |
+| pdfjs | a Node runtime, both pdf.js builds, and the three driver scripts | no |
+| java | the PDFBox and Tika 3 jars; Tika 4 from its release zip, checked against the archive's SHA-512; the iText kernel with `io`, `commons`, `bouncy-castle-connector` and `slf4j-api`; and the two structure-tree drivers | no |
 | verapdf | the reference PDF/A and PDF/UA validator | no |
 
 Every stage is idempotent — it skips what is already there — and every stage is
 optional. Skip one and the engines it provides report as *not run* rather than
 failing anything. `--no-system` on a machine without the system packages still
-gets you five of the thirteen engines (`mupdf`, `pdfium`, `pdfminer` and both
-pdf.js builds): the poppler, Ghostscript and Tesseract engines need their
-packages, and PDFBox, Tika and veraPDF need the Java runtime. Everything
-`setup.sh` downloads is pinned — Node, both pdf.js builds, the jars, veraPDF and
-the three Python packages — so a run compares like with like across machines;
-the system packages are whatever the distribution ships.
+gets you six of the seventeen engines (`mupdf`, `pdfium`, `pdfminer` and all
+three pdf.js configurations): the poppler, Ghostscript and Tesseract engines
+need their packages, and PDFBox, both Tikas, iText and veraPDF need the Java
+runtime. Everything `setup.sh` downloads is pinned — Node, both pdf.js builds,
+the jars, Tika 4, veraPDF and the three Python packages — so a run compares like
+with like across machines; the system packages are whatever the distribution
+ships.
+
+**Java.** Tika 4 needs Java 17 or newer; everything else on the JVM runs on 11.
+`itext-struct`'s driver is a single `.java` file that the `java` launcher
+compiles on every run, which needs the `jdk.compiler` module. Fedora's headless
+JRE carries it, and Debian's does not, which is why the system stage adds
+`default-jdk-headless` there. `setup.sh` warns when the module is missing, and
+the engine then reports as *skipped*.
 
 The virtualenv is deliberately the suite's own rather than whatever Python
 happens to be active — these three extractors are a test dependency, and a

@@ -1,7 +1,7 @@
 """Shared vocabulary for the pipeline and the two scorers.
 
 Author: Patrik Goldschmidt
-Date: 2026-09-06, last rev. 2026-10-04
+Date: 2026-09-06, last rev. 2026-10-30
 
 check.py and order.py read the same extractions and the same phrase list, so
 they have to agree on which engines exist and in what order they are reported,
@@ -32,9 +32,19 @@ OUT_DIR = TESTS_DIR / "out"
 ENV_DIR = TESTS_DIR / "env"
 
 #: Every engine extract.py can write, in the order both scorers report them.
-ENGINES = ["poppler", "poppler-raw", "poppler-layout", "mupdf", "pdfium",
-           "pdfminer", "ghostscript", "pdfjs-old", "pdfjs-new",
-           "pdfbox", "pdfbox-sorted", "tika", "tesseract"]
+#: The four `-struct' engines read the structure tree rather than the page;
+#: STRUCT_ENGINES below.
+ENGINES = ["poppler", "poppler-raw", "poppler-layout", "poppler-struct",
+           "mupdf", "pdfium", "pdfminer", "ghostscript",
+           "pdfjs-old", "pdfjs-new", "pdfjs-struct",
+           "pdfbox", "pdfbox-sorted", "tika", "tika-struct", "itext-struct",
+           "tesseract"]
+
+#: The engines that write text in structure-tree order: the logical order the
+#: tags declare, independent of where anything sits on the page and of the
+#: order the content stream draws it in. They see only what the tree
+#: references, so artifacts and untagged text never reach them.
+STRUCT_ENGINES = {"poppler-struct", "pdfjs-struct", "tika-struct", "itext-struct"}
 
 #: The four builds the class can make: layout, and whether it is compressed.
 VARIANTS = ("onecolumn", "onecolumn-compr", "twocolumn", "twocolumn-compr")
@@ -58,6 +68,22 @@ VARIANTS = ("onecolumn", "onecolumn-compr", "twocolumn", "twocolumn-compr")
 #: the whole Publications block after References. The engines that hold 1.00
 #: there do so because they emit content-stream order. In one column all
 #: twelve text-layer engines reach 1.00 (re-verified 2026-09-06).
+#:
+#: The structure-tree engines are measured against the tag order rather than
+#: the stream (see order.py), except itext-struct, which defines the tag order
+#: and is measured against the stream. All four are strict on order in every
+#: layout, because a two-column CV is held to one page: there the tag order,
+#: the stream and pdf.js's and Tika's page-by-page reading all coincide (1.00
+#: on resources/demos/2c1p, 2026-10-30). A two-column body that runs on to a
+#: second page fails here by design -- its tags finish the column that runs
+#: over before starting the other, while the stream, pdf.js and Tika take the
+#: pages in turn (0.85-0.87 on main.tex --opt twocolumn).
+#:
+#: poppler-struct is strict everywhere, which holds the class to drawing icons
+#: as artifacts (\lcv@icon). pdfinfo pops the enclosing MCID at the EMC of any
+#: sequence nested inside it, and loses whatever text follows in that MCID;
+#: with each icon's ActualText span nested in the text it cost the header's
+#: location and citizenship and each referee's e-mail and affiliation.
 _COVERAGE_2C = {"poppler-layout", "ghostscript", "pdfbox-sorted", "tesseract"}
 _ORDER_2C = _COVERAGE_2C | {"poppler", "pdfminer"}
 

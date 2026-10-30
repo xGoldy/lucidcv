@@ -40,7 +40,7 @@ This README covers the class's features, setup, usage, and ATS-compatibility tes
 ## 1. Features
 
 - **Modern, clean design.** Inspired by [PlushCV](https://github.com/cystema/PlushCV) with bundled Inter, Source Sans 3 and Source Code Pro fonts, a single accent color driving the palette, section heading rules, and Font Awesome 5 icons in the contact line. These choices aim to remain visually appealing without compromising machine readability (see [ATS Compatibility as a Design Priority](#ats-compatibility-as-a-design-priority)).
-- **PDF/A-2b, PDF/UA-1 and tagged PDF.** The output conforms to the PDF/A-2b standard for long-term archiving and to the PDF/UA-1 standard for accessibility, and includes a tagged document structure: headings use `H2`/`H3`, the photo is a `Figure` with alternative text, links carry a description, decorative rules and leaders are marked as artifacts. Title, author, and subject are populated automatically from the header. This improves interoperability with PDF readers, screen readers, and parserss.
+- **PDF/A-2b, PDF/UA-1 and tagged PDF.** The output conforms to the PDF/A-2b standard for long-term archiving and to the PDF/UA-1 standard for accessibility, and includes a tagged document structure: headings use `H2`/`H3`, the photo is a `Figure` with alternative text, links carry a description, decorative rules, leaders and icons are marked as artifacts. Title, author, and subject are populated automatically from the header. This improves interoperability with PDF readers, screen readers, and parserss.
 - **Customizable without touching the class.** Accent color in any color model, margins, column ratio, font sizes, and the spacing between items, entries, and sections can all be configured from the preamble (see [Preamble](#preamble)).
 - **One content file, multiple layouts.** The same body can be typeset in one or two columns, and at regular or compressed density, by changing class options only. Column breaks are safely ignored in the single-column layout, so there is no need to maintain separate versions of the content.
 - **Header with contact fields and photo.** Predefined contact fields (email, phone, address, location, homepage, LinkedIn, GitHub, ORCID) display their full service prefix (e.g., `github.com/xGoldy`) and can be turned into clickable links. Custom fields with icons can also be declared. A circular photo can be added to the header and enabled or disabled with a single class option.
@@ -55,7 +55,7 @@ A PDF that looks good on screen says nothing about what a parser can extract fro
 Because many resume templates are validated primarily by visual inspection, their extracted text might contain merged words, icons turned into random characters, interleaved columns, or dates detached from their entries. In contrast, Lucid CV was designed and validated against what extractors actually return, with each relevant design decision measured rather than assumed.
 
 - **PDF tagging: Real spaces between words.** Instead of having PDF extractors infer the space between words, the class stores word gaps as actual space characters (with LuaLaTeX and PDF tagging enabled). As a result, extractors do not rely solely on horizontal positioning, which helps prevent them from merging words (e.g., `Loremipsumdolor`).
-- **Icons extract as whitespace.** During PDF-to-text extraction, icon glyphs can be extracted as random letters or icon names (`LINKEDIN`, `Github`). The class makes every icon extract as a plain space using two independent mechanisms, because no single one covers all extractors. Icons are never assigned text labels either, since extracting words that were never written is worse than extracting no word at all. The `noicons` option removes icons entirely for legacy systems.
+- **Icons extract as whitespace.** During PDF-to-text extraction, icon glyphs can be extracted as random letters or icon names (`LINKEDIN`, `Github`). The class makes every icon extract as a plain space using two independent mechanisms, because no single one covers all extractors, and tags it as a decorative artifact, so screen readers and tag-aware parsers skip it altogether. Icons are never assigned text labels either, since extracting words that were never written is worse than extracting no word at all. The `noicons` option removes icons entirely for legacy systems.
 - **Readable contact values.** Contact fields display a self-explanatory link (e.g., `linkedin.com/in/your_id` rather than only `your_id`), allowing parsers to identify the value without relying on the adjacent icon. Contact items are separated by an explicit `|` delimiter.
 - **No header fusing.** The first name, last name, and tagline are separated by invisible space characters, so the header does not extract as `FirstnameLastnameTagline`. These spaces have no visual effect.
 - **Dates stay with their entries.** Many resume templates place dates at the far right of the page, leaving a large horizontal gap between the entry text and its date. Some parsers may interpret such a gap as a separate column and consequently detach the date from the entry. To tackle this issue, Lucid CV connects right-aligned dates to the entry title with a dotted leader.
@@ -63,13 +63,13 @@ Because many resume templates are validated primarily by visual inspection, thei
 - **Chips that survive OCR.** Skill chips (tags) use an en dash delimiter and a border tint and width chosen based on Optical Character Recognition (OCR) measurements, helping OCR-based extraction preserve the skill list correctly.
 - **Single column by default.** Two-column layouts may extract out of order in parsers that read text according to its position on the page. This is a general limitation of multi-column PDFs and cannot be reliably eliminated within the document itself. Therefore, the `onecolumn` layout is the default and `twocolumn` must be enabled explicitly with the understanding that PDF parsability may be degraded.
 
-All of the above is verified by the test suite described in [Testing for ATS Compatibility](#5-testing-for-ats-compatibility), which checks whether every resume phrase is extracted intact and in the correct order by 9 extraction engines in 13 configurations, including OCR. The technical details and measurements behind these decisions are documented in the [ATS and accessibility notes](resources/docs.md#ats-and-accessibility-notes) of docs.md.
+All of the above is verified by the test suite described in [Testing for ATS Compatibility](#5-testing-for-ats-compatibility), which checks whether every resume phrase is extracted intact and in the correct order by 10 extraction engines in 17 configurations, including OCR and four configurations that read the PDF's tag structure. The technical details and measurements behind these decisions are documented in the [ATS and accessibility notes](resources/docs.md#ats-and-accessibility-notes) of docs.md.
 
 ## 2. Examples
 
-The template ships with a sample resume, `contents.tex`, written for a senior software engineering role and compiled from `main.tex` out of the box. It serves as a reference rather than a showcase, using every body macro provided by the class, with comments explaining each one. The sample persona, Adrian Castellanos, is fictional, as are the employers and referees. The photo is also AI-generated.
+The template ships with a sample resume, `contents.tex`, written for a senior software engineering role and compiled from `main.tex` out of the box. Other resume variants typeset to 1-column and 2-columns are provided in `resources/demos/`. They as a reference rather than a showcase, using every body macro provided by the class, with comments explaining each one. The sample persona, Adrian Castellanos, is fictional, as are the employers and referees. The photo is also AI-generated.
 
-For additional inspiration, the following subsections show three real-world resume variants demonstrating how the class can be used in practice. They are based on my own general-purpose resumes for cybersecurity and AI research positions.
+For inspiration, the following subsections show three resume variants demonstrating how I used the class for real-world job applications. They are based on my own general-purpose resumes for cybersecurity and AI research positions.
 
 ### Example 1: One Column, Two Pages
 
@@ -336,25 +336,29 @@ A mistyped keyword name, e.g., `\cventry[onelin]`, is different: it stops compil
 
 ## 5. Testing for ATS Compatibility
 
-Since Lucid CV is designed to be ATS-compatible, the `tests/` directory contains a test suite to verify this claim. Because commercial ATSs are typically closed-source and do not provide direct access to their document-processing engines, their PDF parsing behavior cannot be tested directly. Instead, the test suite evaluates the resume using 9 PDF/OCR engines in 13 configurations, providing a practical estimate of PDF parsability across different extraction implementations.
+Since Lucid CV is designed to be ATS-compatible, the `tests/` directory contains a test suite that verifies this claim. Commercial resume parsers such as Textkernel/Sovren, Daxtra, and HireAbility are closed-source and cannot be run locally, so the suite **does not guarantee compatibility with any particular commercial ATS**. Every parser, however, must first extract the text from the PDF, and that step can be tested: the suite reads the resume back with 10 PDF/OCR engines in 17 configurations. Consistent results across them thus provide a strong evidence that the PDF is machine-readable, and a useful indication of how other parsers, commercial ones included, will read it.
 
 | Engine | Test mode | Description |
 | --- | --- | --- |
 | **Poppler** (`pdftotext`) | `poppler` | Default mode. Widely used in Linux tooling and PDF-processing pipelines. |
 | | `poppler-raw` | Extracts text in content-stream order. |
 | | `poppler-layout` | Attempts to preserve the physical page layout. |
+| | `poppler-struct` | Reads the tag structure (`pdfinfo -struct-text`). |
 | **MuPDF** (PyMuPDF) | `mupdf` | Independent PDF-processing implementation. |
 | **PDFium** (pypdfium2) | `pdfium` | PDF engine used by Chromium-based browsers. |
 | **pdfminer.six** | `pdfminer` | Python-based PDF text extraction library commonly used for custom document-processing pipelines. |
 | **Ghostscript** (`txtwrite`) | `ghostscript` | Ghostscript's text extraction; the strictest word-gap heuristic of the set. |
 | **pdf.js** | `pdfjs-old` | Version 2.5.207, representative of older pdf.js integrations. |
 | | `pdfjs-new` | Current pdf.js version, used by Firefox. |
+| | `pdfjs-struct` | Reads the tag structure, as Firefox does for screen readers. |
 | **Apache PDFBox** | `pdfbox` | Default extraction mode. Widely used in Java-based document-processing pipelines. |
 | | `pdfbox-sorted` | Position-sorting mode (`-sort`). |
 | **Apache Tika** | `tika` | Delegates PDF extraction to PDFBox, testing Tika's document-processing pipeline rather than an independent PDF engine. |
+| | `tika-struct` | Tika 4, forced to follow the tag structure. |
+| **iText** | `itext-struct` | Reads the tag structure (`TaggedPdfReaderTool`) |
 | **Tesseract** | `tesseract` | OCR performed on rendered pages, representing extraction from a PDF when its text layer is unavailable or unusable. |
 
-Commercial resume parsers such as Textkernel/Sovren, Daxtra, and HireAbility are proprietary systems whose internal PDF-processing pipelines cannot be reproduced locally. The test suite therefore **does not guarantee compatibility with any particular commercial ATS**, but consistent extraction across 13 configurations—including OCR—provides evidence of robust, machine-readable PDF content and a useful indication of general parsability.
+A tagged PDF carries a hidden outline (its tags) that marks the document's elements and defines its reading order. Most configurations ignore it and infer the order based on where text is drawn on the page. However, the four `-struct` configurations follow the outline instead, as screen readers and tag-aware parsers do. They hence test the tagging itself: untagged text never reaches them, and decorative elements such as icons and dotted leaders are skipped.
 
 ### Test Descriptions
 
@@ -367,39 +371,46 @@ The test pipeline takes one `.tex` file, extracts the expected visible phrases f
 5. **XMP metadata:** The title, author, subject, and keywords are stored in the PDF's XMP metadata.
 6. **No hidden text:** Apart from whitespace, every character in the PDF is visible: none is invisible, near-white, nearly transparent, smaller than 4 pt, off the page, stacked on other text, or behind an image. Screening tools may treat hidden text as keyword stuffing and flag the whole document.
 7. **Text extraction:** Every expected phrase is found in the text.
-8. **Reading order:** The extracted phrases appear in the same order as in the document, ensuring that dates remain associated with their entries and that columns do not interleave.
+8. **Reading order:** The extracted phrases appear in the same order as in the document, ensuring that dates remain associated with their entries and that columns do not interleave. The `-struct` configurations are checked against the order declared by the tags.
 9. **Word-gap characters** (report only, never fails): The whitespace character returned between words by each extraction configuration is recorded, since some parsers do not treat non-breaking spaces as regular whitespace.
 
 ### Results
 
-The [latest test report](https://xgoldy.github.io/lucidcv/report.html) covers a full pipeline run on the three generic variants described in Section 2 (Examples): one column on two pages (`1c2p`), and two compressed one-page variants with one column (`1c1p`) and two columns (`2c1p`). All three pass every required test:
+The [latest test report](https://xgoldy.github.io/lucidcv/report.html) covers a full pipeline run on the three demo resumes in `resources/demos/`, which use the layouts shown in Section 2 (Examples): one column on two pages (`1c2p`), and two compressed one-page variants with one column (`1c1p`) and two columns (`2c1p`). All three pass every required test:
 
 | Test | 1c2p | 1c1p | 2c1p |
 | --- | --- | --- | --- |
-| Phrases checked | 91 | 76 | 73 |
+| Phrases checked | 111 | 77 | 89 |
 | 1. Real word spaces | pass | pass | pass |
 | 2. Icons as whitespace | pass | pass | pass |
 | 3. PDF/A-2b conformance (veraPDF) | pass | pass | pass |
-| 4. Text extraction, 12 text-layer configurations | all complete | all complete | 9 complete, 3 at 49–50/73 |
-| 4. Text extraction, Tesseract (OCR) | 79/91 | 70/76 | 65/73 |
-| 5. Reading order of the body, 12 text-layer configurations | 1.00 | 1.00 | 8 at 1.00, 4 at 0.71–0.86 |
-| 6. Word-gap characters | plain spaces only | plain spaces only | plain spaces only |
+| 4. PDF/UA-1 conformance (veraPDF) | pass | pass | pass |
+| 5. XMP metadata | pass | pass | pass |
+| 6. No hidden text | pass | pass | pass |
+| 7. Text extraction, 16 text-layer configurations | all complete | all complete | 13 complete, 3 at 60–63/89 |
+| 7. Text extraction, Tesseract (OCR) | 106/111 | 76/77 | 86/89 |
+| 8. Reading order of the body, 16 text-layer configurations | 1.00 | 1.00 | 12 at 1.00, 4 at 0.55–0.95 |
+| 9. Word-gap characters | plain spaces only | plain spaces only | plain spaces only |
 
-For the one-column variants, every text-layer configuration returns all phrases in document order. The only extraction losses occur with the two-column layout: `poppler-layout`, `ghostscript`, and `pdfbox-sorted` reconstruct lines across the full page width, causing the two columns to be spliced together and approximately one-third of the phrases to be lost. The same three configurations, together with `poppler`, also produce incorrect reading order because they sort or reconstruct text based on its position. These are known limitations of the respective extraction methods with two-column layouts and therefore do not cause the test suite to fail. **If you want the safest choice for ATS parsing, use one column.**
+For the one-column variants, every text-layer configuration returns all phrases in document order. The only extraction losses occur with the two-column layout for engines that reconstruct lines across the full page width, causing the two columns to be spliced together. This format might also cause some parsers to mess up the reading order. These are known limitations of the respective extraction methods with two-column layouts and therefore do not cause the test suite to fail. The four `-struct` configurations, which follow the tags instead of the page, return every phrase in order in all three variants. **Therefore, if you want the safest choice for ATS parsing, use one column.**
 
-The Tesseract misses are OCR errors rather than problems with the PDF itself. Capital `I` is occasionally recognized as lowercase `l` in `AI`, while Czech and Slovak diacritics may be dropped by the English-only OCR model. This has limited practical significance because an ATS normally reads the PDF's text layer and uses OCR only when usable text cannot be extracted.
+The Tesseract misses are OCR errors rather than problems with the PDF itself: the phone number's digit groups run together, and capital `I` is occasionally recognized as lowercase `l` (`CI/CD` as `Cl/CD`). This has limited practical significance because an ATS normally reads the PDF's text layer and uses OCR only when usable text cannot be extracted.
 
-In addition, I manually tested the one-column PDFs produced by the template by uploading them to Workday, Greenhouse, and Lever ATSs during my own job search. In all cases, relevant fields, including contact information, education, work experience, and skills, were extracted correctly.
+### Manual Tests
 
-These results do not constitute a guarantee of compatibility with every ATS. However, they provide strong evidence that one-column PDFs produced by the class are robustly machine-readable across multiple independent PDF extraction implementations and have also performed correctly in several commercial ATSs in practical use.
+In addition to the automated tests described previously, I also performed several manual tests with the compiled PDFs produced by the Lucid CV class. For this purpose, existing ATS engines and PDF validators were used.
+
+Firstly, the PDF was tested using the PDF accessibility checker [PDF4WCAG](https://pdf4wcag.com/), which assesses the accessibility of PDF documents against multiple standards, including WCAG and PDF/UA-1. PDFs produced by Lucid CV passed WCAG 2.2 Machine, PDF/UA-1, and ISO 32005 tests without any issues or warnings.
+
+Regarding real-world ATS systems, I uploaded one-column PDF variants to three popular ATSs: Workday, Greenhouse, and Lever during my own job search. In all cases, relevant fields, including contact information, education, work experience, and skills, were extracted correctly.
 
 ### Running the Tests Yourself
 
 > The `tests/` directory is available only in the [GitHub repository](https://github.com/xGoldy/lucidcv), not in the Overleaf or CTAN packages.
 
-If you wish to run the PDF extraction tests yourself, the `pipeline.sh` script provides an end-to-end way to run the full test suite. First, set up the test environment with `setup.sh`. This script installs the required tools in two groups: system packages (Poppler, Ghostscript, Tesseract, and a Java runtime), installed through `apt-get` or `dnf` and requiring root privileges; and local dependencies (Python, pdf.js, PDFBox, Tika, and veraPDF), installed under `tests/env/` without root access.
+If you wish to run the PDF extraction tests yourself, the `pipeline.sh` script provides an end-to-end way to run the full test suite. First, set up the test environment with `setup.sh`. This script installs the required tools in two groups: system packages (Poppler, Ghostscript, Tesseract, and a Java runtime), installed through `apt-get` or `dnf` and requiring root privileges; and local dependencies (Python, pdf.js, PDFBox, Tika 3 and 4, iText, and veraPDF), installed under `tests/env/` without root access. Tika 4 requires Java 17 or newer, and the iText configuration needs the JDK's `jdk.compiler` module, which is included in Fedora's headless Java package and installed as `default-jdk-headless` on Debian-based systems.
 
-With `--no-system`, the system packages are skipped. Tests that depend on them are reported as _not run_ rather than failing. This leaves 5 of the 13 configurations available (`mupdf`, `pdfium`, `pdfminer`, `pdfjs-old`, and `pdfjs-new`), while the PDF/A and PDF/UA checks fall back to their built-in approximations.
+With `--no-system`, the system packages are skipped. Tests that depend on them are reported as _not run_ rather than failing. This leaves 6 of the 17 configurations available (`mupdf`, `pdfium`, `pdfminer`, `pdfjs-old`, `pdfjs-new`, and `pdfjs-struct`), while the PDF/A and PDF/UA checks fall back to their built-in approximations.
 
 The TeX toolchain is not installed by the test setup script. The same LuaLaTeX environment used to build the class (see [Local Compilation (Linux)](#local-compilation-linux)) is required.
 
@@ -437,4 +448,4 @@ Although much of this class and its associated tooling was vibe-coded (Opus 5), 
 
 The class was originally created to solve my own problem, but as a strong supporter of free and open-source software, I decided to release it for anyone looking for an alternative to inflexible free templates, ATS-unfriendly design tools, or premium templates that cost hundreds of dollars.
 
-If you found the class useful, I would appreciate a message or simply a GitHub ⭐. If you feel that your gratitude cannot be expressed in words, you can also buy me a coffee on [Ko-fi](https://ko-fi.com/Z6Q8280XSJ). Your support helps me maintain this template and create more open-source projects in the future. Many thanks!
+If you found the class useful, I would appreciate a message or simply a GitHub star. If you feel that your gratitude cannot be expressed in words, you can also buy me a coffee on [Ko-fi](https://ko-fi.com/Z6Q8280XSJ). Your support helps me maintain this template and create more open-source projects in the future. Many thanks!

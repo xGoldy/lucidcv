@@ -3,7 +3,7 @@
 # Prepare environment (i.e., Python, Java) for running the test suite.
 #
 # Author: Patrik Goldschmidt
-# Date: 2026-09-06, last rev. 2026-10-04
+# Date: 2026-09-06, last rev. 2026-10-30
 #
 #   ./setup.sh                install everything
 #   ./setup.sh --no-system    skip the system packages, install the rest
@@ -16,8 +16,9 @@
 #            on Fedora and RHEL ones. Touches the system and requires root.
 #   venv     a virtualenv at env/python with the three Python extractors in it
 #            -- PyMuPDF, pypdfium2 and pdfminer.six.
-#   pdfjs    a Node runtime, two pdf.js builds, and the two driver scripts.
-#   java     the PDFBox and Tika jars.
+#   pdfjs    a Node runtime, two pdf.js builds, and the three driver scripts.
+#   java     the PDFBox and Tika jars, plus Tika 4 and iText for the two JVM
+#            engines that read the structure tree, and their drivers.
 #   verapdf  the reference PDF/A validator.
 #
 # Everything except the system stage lands under tests/env/. Each stage is
@@ -32,11 +33,16 @@ PDFJS_NEW=4.10.38          # 5.x and 6.x need a DOMMatrix that Node gained in 22
 NODE=v20.18.1
 PDFBOX=3.0.5               # PDFBox 3 and Tika 3 both need Java 11 or newer
 TIKA=3.2.3
+TIKA_STRUCT=4.2.0          # 3.x skips /MCR kids, i.e. all of LaTeX's; needs Java 17
+ITEXT=9.8.0
+SLF4J=2.0.16               # the slf4j-api iText $ITEXT is built against
 VERAPDF=1.30.2
 VERAPDF_SERIES=1.30
 
 PY_PKGS=(pymupdf==1.28.2 pypdfium2==5.13.0 pdfminer.six==20260107)
-APT_PKGS=(poppler-utils ghostscript tesseract-ocr default-jre
+# The JDK only for its jdk.compiler module, which runs the iText driver from
+# source; Fedora's headless JRE already carries it, Debian's does not.
+APT_PKGS=(poppler-utils ghostscript tesseract-ocr default-jre default-jdk-headless
           python3-venv curl unzip xz-utils)
 # Fedora ships venv inside python3 and names the JRE and Tesseract differently.
 DNF_PKGS=(poppler-utils ghostscript tesseract java-latest-openjdk-headless
@@ -46,6 +52,11 @@ HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_DIR="$HERE/env"
 VENV="$ENV_DIR/python"
 MAVEN=https://repo1.maven.org/maven2/org/apache
+MAVEN_ROOT=https://repo1.maven.org/maven2
+# Tika 4 ships tika-app as a jar plus lib/ only in the release zip; the jar on
+# Maven Central is the bare CLI. The archive keeps every release, the mirrors
+# only the latest.
+APACHE_ARCHIVE=https://archive.apache.org/dist
 
 DO_SYSTEM=1
 
@@ -228,6 +239,70 @@ for (let p = 1; p <= doc.numPages; p++) {
 }
 process.stdout.write(out);
 JSEOF
+
+  cat > "$ENV_DIR/pdfjs/extract-struct.mjs" <<'JSEOF'
+// Text in STRUCTURE-TREE order, through the same current pdf.js -- what Firefox
+// builds its accessibility tree from, and so what a screen reader there reads.
+// Each page's text is collected per marked-content id (getTextContent with
+// includeMarkedContent) and written in the order the page's structure tree
+// references those ids. Nothing else is written: an artifact, or text nobody
+// tagged, is never referenced, so it never comes out.
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+// pdf.js warns on STDOUT; see extract-new.mjs.
+for (const k of ["log", "info", "warn", "debug"]) {
+  console[k] = (...a) => process.stderr.write(a.join(" ") + "\n");
+}
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const pdfjsLib = await import(
+  path.join(here, "vendor", "pdfjs-new", "legacy", "build", "pdf.mjs")
+);
+
+// Standard inline-level types (ISO 32000-1, 14.8.4.4), after the role map,
+// which pdf.js applies. They continue the line; every other element is a
+// block and starts one, as a screen reader would break it.
+const INLINE = new Set(["Span", "Quote", "Note", "Reference", "BibEntry",
+  "Code", "Link", "Annot", "Ruby", "RB", "RT", "RP", "Warichu", "WT", "WP",
+  "Lbl", "Em", "Strong", "Sub"]);
+const ARTIFACT = Symbol("artifact");
+
+const data = new Uint8Array(fs.readFileSync(process.argv[2]));
+const doc = await pdfjsLib.getDocument({ data, disableFontFace: true }).promise;
+let out = "";
+for (let p = 1; p <= doc.numPages; p++) {
+  const page = await doc.getPage(p);
+  const tc = await page.getTextContent({ includeMarkedContent: true });
+  // A glyph belongs to the innermost enclosing sequence that has an id; an
+  // Artifact in between claims it for nobody.
+  const byId = new Map();
+  const stack = [];
+  for (const it of tc.items) {
+    if (it.type === "beginMarkedContent" || it.type === "beginMarkedContentProps") {
+      stack.push(it.tag === "Artifact" ? ARTIFACT : (it.id ?? null));
+    } else if (it.type === "endMarkedContent") {
+      stack.pop();
+    } else {
+      const id = stack.findLast((x) => x !== null);
+      if (id === undefined || id === ARTIFACT) continue;
+      byId.set(id, (byId.get(id) ?? "") + it.str + (it.hasEOL ? "\n" : ""));
+    }
+  }
+  const walk = (node) => {
+    if (node.type === "content") { out += byId.get(node.id) ?? ""; return; }
+    if (node.type) return;  // "object" or "annotation": no text of its own
+    const block = !INLINE.has(node.role);
+    if (block) out += "\n";
+    for (const kid of node.children ?? []) walk(kid);
+    if (block) out += "\n";
+  };
+  const tree = await page.getStructTree();
+  if (tree) walk(tree);
+}
+process.stdout.write(out);
+JSEOF
 }
 
 install_pdfjs() {
@@ -274,14 +349,77 @@ install_pdfjs() {
 # ---- 4. The JVM extractors --------------------------------------------------
 # The JRE is NOT vendored -- at ~180 MB it dwarfs both jars, and any `java' on
 # PATH will do. The system stage installs one.
+#
+# The two structure-tree drivers are written from here for the same reason as
+# the pdf.js ones: env/ stays reconstructible from this file. Edit them here.
+write_java_drivers() {
+  # Tika 4 reads the structure tree by default, but under AUTO a page whose
+  # tags it distrusts quietly falls back to the plain stripper -- which is
+  # the `tika' engine over again. TAGS follows the tree on every tagged page,
+  # so a structure problem shows as a loss instead of being papered over. The
+  # PDF parser is excluded from the default parser and declared on its own,
+  # so this configuration is the one it runs with; Tesseract is excluded so
+  # the photo is not OCR'd into the text.
+  cat > "$ENV_DIR/java/tika-struct.json" <<'JSONEOF'
+{
+  "parsers": [
+    {"default-parser": {"exclude": ["pdf-parser", "tesseract-ocr-parser"]}},
+    {"pdf-parser": {"markedContent": {"strategy": "TAGS"}}}
+  ]
+}
+JSONEOF
+
+  # Run from source by the java launcher, so no compiler is needed beyond the
+  # JDK's jdk.compiler module. TaggedPdfReaderTool dumps the structure tree as
+  # XML with every element's marked content as text; extract.py strips the
+  # markup. The dump names elements by their own type -- `text-unit', `Em' --
+  # so the role map goes ahead of it, one comment per entry, for extract.py to
+  # tell an inline element from a block. The one override: for an object
+  # reference (a link's annotation) the tool writes the annotation's /Subtype
+  # -- `/Link' -- where content would go. That is the dump's notation, not
+  # text in the PDF, and left in it glues `/Link' onto every contact field.
+  cat > "$ENV_DIR/java/ItextStruct.java" <<'JAVAEOF'
+import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.tagging.PdfMcr;
+import com.itextpdf.kernel.utils.TaggedPdfReaderTool;
+
+public class ItextStruct {
+    public static void main(String[] args) throws Exception {
+        try (PdfDocument doc = new PdfDocument(new PdfReader(args[0]))) {
+            PdfDictionary roleMap = doc.getStructTreeRoot().getRoleMap();
+            for (PdfName key : roleMap.keySet()) {
+                PdfName type = roleMap.getAsName(key);
+                if (type != null) {
+                    System.out.println("<!-- role " + key.getValue() + " "
+                                       + type.getValue() + " -->");
+                }
+            }
+            System.out.flush();
+            new TaggedPdfReaderTool(doc) {
+                @Override
+                protected void parseTag(PdfMcr kid) {
+                    if (kid.getMcid() != -1) {
+                        super.parseTag(kid);
+                    }
+                }
+            }.convertToXml(System.out, "UTF-8");
+        }
+    }
+}
+JAVAEOF
+}
+
 install_java() {
-  stage "PDFBox and Tika"
+  stage "PDFBox, Tika and iText"
 
   local vendor="$ENV_DIR/java/vendor"
   mkdir -p "$vendor"
 
   if ! command -v java >/dev/null; then
-    echo "setup.sh: no java on PATH -- skipping. Install a JRE 11+ and re-run." >&2
+    echo "setup.sh: no java on PATH -- skipping. Install a JRE 17+ and re-run." >&2
     return 0
   fi
 
@@ -297,7 +435,44 @@ install_java() {
   fetch_jar "$MAVEN/tika/tika-app/$TIKA/tika-app-$TIKA.jar" \
             "$vendor/tika-app.jar"
 
-  echo "setup.sh: $(java -version 2>&1 | head -1), PDFBox $PDFBOX and Tika $TIKA"
+  # Tika 4: a jar, lib/ and plugins/, from the release zip.
+  local tika_dir="$vendor/tika-struct" zip="tika-app-$TIKA_STRUCT.zip"
+
+  if [[ -d "$tika_dir" ]]; then
+    echo "setup.sh: tika-struct already present"
+  else
+    echo "setup.sh: fetching $zip"
+    rm -rf "$tika_dir.part"
+    mkdir -p "$tika_dir.part"
+    curl -fsSL -o "$tika_dir.part/$zip" "$APACHE_ARCHIVE/tika/$TIKA_STRUCT/$zip"
+    curl -fsSL -o "$tika_dir.part/$zip.sha512" \
+         "$APACHE_ARCHIVE/tika/$TIKA_STRUCT/$zip.sha512"
+    (cd "$tika_dir.part" && sha512sum -c --quiet <(echo "$(cut -d' ' -f1 "$zip.sha512")  $zip"))
+    unzip -q "$tika_dir.part/$zip" -d "$tika_dir.part"
+    rm "$tika_dir.part/$zip" "$tika_dir.part/$zip.sha512"
+    mv "$tika_dir.part/tika-app-$TIKA_STRUCT.jar" "$tika_dir.part/tika-app.jar"
+    mv "$tika_dir.part" "$tika_dir"
+  fi
+
+  # iText: the kernel, which holds TaggedPdfReaderTool, and what it needs on
+  # the class path to read a PDF -- no layout, no signing provider.
+  mkdir -p "$vendor/itext"
+  for a in kernel io commons bouncy-castle-connector; do
+    fetch_jar "$MAVEN_ROOT/com/itextpdf/$a/$ITEXT/$a-$ITEXT.jar" \
+              "$vendor/itext/$a.jar"
+  done
+  fetch_jar "$MAVEN_ROOT/org/slf4j/slf4j-api/$SLF4J/slf4j-api-$SLF4J.jar" \
+            "$vendor/itext/slf4j-api.jar"
+
+  write_java_drivers
+
+  if ! java --list-modules 2>/dev/null | grep -q '^jdk\.compiler@'; then
+    echo "setup.sh: this java has no jdk.compiler module, so the iText driver" \
+         "cannot run from source -- install a JDK (default-jdk-headless)" >&2
+  fi
+
+  echo "setup.sh: $(java -version 2>&1 | head -1), PDFBox $PDFBOX, Tika $TIKA" \
+       "and $TIKA_STRUCT, iText $ITEXT"
 }
 
 # ---- 5. veraPDF -------------------------------------------------------------
