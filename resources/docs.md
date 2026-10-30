@@ -522,7 +522,7 @@ Set these in your document, after `\documentclass`. **Most are `\renewcommand`-a
 | `\cvnameleading` / `\cvtaglineleading` | their leading, as a multiple of size — `1.105` and `1.2` |
 | `\namefont`, `\taglinefont`, `\personalinfofont`, `\cvsectionfont`, `\cvsubsectionfont` | the header and heading font hooks. `\cvsectionfont`/`\cvsubsectionfont` are `16/20`/`11/14` normally, `13/16`/`10/12` under `compressed`. `\personalinfofont` is `\cvinfofontscale` × the class size option (`0.9`, so 9pt at `[10pt]`) on `\cvinfoleading` × that (`1.4`, so 12.6pt) — the **one** header element that tracks the size option. See the note under this table |
 | `\cvphotogutter` | the gap between the name block and the photo (`1ex`). Read twice — once to reserve it out of the name block's width, once to emit it — so it has to be one value or the two halves of the header disagree about how wide it is |
-| `\cvaccent` | the template's one accent color — name, section headings, the rule under them, every icon/chip/marker. `\cvaccent{B03A2E}` takes HTML by default; `\cvaccent[RGB]{29,118,226}` and `\cvaccent[named]{OliveGreen}` take any other xcolor model (loaded with `dvipsnames`, so `named` reaches 19 base names plus 68 classic ones). Prefer it to redefining `CVBlue` directly: `\colorlet` copies, so a bare redefinition leaves the five derived slots (`accent`, `name`, `heading`, `headingrule`, `grouprule`) holding the old value |
+| `\cvaccent` | the template's one accent color — name, section headings, the rule under them, every icon/chip/marker. `\cvaccent{B03A2E}` takes HTML by default; `\cvaccent[RGB]{29,116,222}` and `\cvaccent[named]{OliveGreen}` take any other xcolor model (loaded with `dvipsnames`, so `named` reaches 19 base names plus 68 classic ones). The default, `1D74DE`, is chosen for contrast; a replacement needs 4.5:1 on white too — see *The accent's contrast*. Prefer it to redefining `CVBlue` directly: `\colorlet` copies, so a bare redefinition leaves the five derived slots (`accent`, `name`, `heading`, `headingrule`, `grouprule`) holding the old value |
 | `CVBlue`, `CVPrimary`, `CVSubheading`, `CVGrey`, `CVDate` | the five base color constants the semantic names (`accent`, `body`, `heading`, …) resolve to. Redefine one directly, or `\colorlet` a semantic name to something else entirely |
 | `entryorg` | color of the organization after the job title — `CVSubheading`. `\colorlet{entryorg}{accent}` makes it the accent color |
 | `entryleader` | color of the flush-right dot leader (`flushdate`, on by default for a `oneline` entry) — `CVGrey!30`. The one part of the leader that is safe to restyle, because color never reaches an extractor; `!20` or lighter costs OCR, which reads the page rather than the text layer |
@@ -575,6 +575,38 @@ Small-cap glyphs are OpenType alternates outside the font's `cmap`, and `\MakeUp
 **Do not put that back.** poppler 22.02 honors only the first ~30 ActualText spans on a page and then drops the rest *including the glyphs they cover* — with one span per heading and per entry the sample reached 54 spans, and `pdftotext` returned a résumé missing its entire Education section and seven of nine section headings, invisible unless you diff against another engine. Drawing the characters directly removes the dependency.
 
 The class ships no small-caps or uppercase styling hooks at all, for this reason. All-caps section headings are conventional on a résumé, but wrapping `\cvsection` in `\textsc` or `\MakeUppercase` means the heading no longer extracts as the word you typed — and correcting that with ActualText walks straight back into the bug above. `\MakeUppercase` additionally hard-fails on `\cvsubsection` if a bibliography heading contains an icon macro, expanding, for example, `\faBook` into a lookup for an icon literally named `BOOK`.
+
+### The accent's contrast: why `1D74DE`
+
+**The default accent is `#1D74DE` because the previous one, `#1D76E2`, failed text contrast by 0.07.** WCAG 1.4.3 asks for a contrast ratio of 4.5:1 between text and its background, relaxed to 3:1 for large text — 18pt, or 14pt when bold. `#1D76E2` on white measures 4.43:1, and an accessibility checker flagged every section heading drawn in it.
+
+**The headings do not qualify as large text, which is why they failed.** They are 16pt (13pt under `compressed`) in Source Sans 3 **Semibold**, weight 600. WCAG's bold means weight 700, so a strict checker holds them to the full 4.5:1. The name at 38pt is large text and passed even at 4.43:1. The contact icons and the reference markers are small text in the same color, and would have been the next to be flagged.
+
+**PDF/UA-1 does not cover this, so veraPDF never reports it.** Contrast is a WCAG success criterion and is not part of PDF/UA-1's machine-checkable rules. The test suite passes either way. Only a checker that looks at the colors of the rendered page catches it.
+
+**The fix keeps the hue and darkens just past the threshold.** Hue (213°) and saturation are held, and only the lightness drops. Three candidates were built into the same one-page CVs, one column and two:
+
+| Color | Contrast on white | Verdict |
+| --- | --- | --- |
+| `#1D76E2` | 4.43:1 | the old default — fails |
+| `#1D75DF` | 4.50:1 | the lightest passing value at this hue — rejected, no margin |
+| **`#1D74DE`** | **4.56:1** | **the default** |
+| `#1C72DB` | 4.69:1 | passes comfortably, visibly deeper on the bold first name |
+
+`#1D75DF` passes only on paper. A checker that samples rendered pixels reads anti-aliased glyph edges, which are lighter than the fill, and can measure it just below 4.5:1. `#1D74DE` keeps a margin against that and still keeps the red channel and the hue of the old color. Next to `#1D76E2`, the difference shows only on the bold first name.
+
+**The derived colors are not held to this.** `headingrule`, `grouprule` and the chip borders are light mixes of the accent. They are decoration, emitted as artifacts, and text contrast does not apply to them. They follow `\cvaccent` on their own.
+
+**`\cvaccent` does not check your color.** A replacement accent is drawn on the same headings and icons, so it has to clear 4.5:1 on white too. Darker hues pass easily: the `B03A2E` used as the example above measures 6.02:1. Light or saturated ones often fail: blues, greens, oranges, teals. To check a color, compute WCAG's relative luminance `L` and the ratio `1.05 / (L + 0.05)`:
+
+```python
+def contrast_on_white(hex6):
+    c = [int(hex6[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    c = [x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+    return 1.05 / (0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] + 0.05)
+
+contrast_on_white("1D74DE")   # 4.56
+```
 
 ### Ghostscript and word spacing
 

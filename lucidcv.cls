@@ -162,7 +162,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Colors
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\definecolor{CVBlue}{HTML}{1D76E2}
+\definecolor{CVBlue}{HTML}{1D74DE}          % 4.56:1 on white (WCAG 4.5:1)
 \definecolor{CVPrimary}{HTML}{2B2B2B}       % body text
 \definecolor{CVSubheading}{HTML}{333333}
 \definecolor{CVGrey}{HTML}{6A6A6A}          % meta lines
@@ -170,7 +170,7 @@
 
 %% Define template color theme; driven by \cvaccent.
 %%     \cvaccent{B03A2E}            % HTML -- the default model
-%%     \cvaccent[RGB]{29,118,226}
+%%     \cvaccent[RGB]{29,116,222}
 %%     \cvaccent[named]{OliveGreen} % any name xcolor knows
 \newcommand{\lcv@deriveaccent}{%
   \colorlet{accent}{CVAccent}%

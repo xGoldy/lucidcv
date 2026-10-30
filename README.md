@@ -189,7 +189,7 @@ Values in parentheses apply when the `compressed` class option is used. Size and
 
 | Command | Default | Description |
 | --- | --- | --- |
-| `\cvaccent[model]{color}` | `1D76E2` | Template accent color. Model is `HTML` by default, but any other `xcolor` model works, e.g., `\cvaccent[RGB]{29,118,226}`, or `\cvaccent[named]{OliveGreen}` for a named color. |
+| `\cvaccent[model]{color}` | `1D74DE` | Template accent color. Model is `HTML` by default, but any other `xcolor` model works, e.g., `\cvaccent[RGB]{29,116,222}`, or `\cvaccent[named]{OliveGreen}` for a named color. |
 | `\geometry{...}` | 1.2cm margins, `columnsep=1.1cm` | Page margins and the gap between columns. |
 | `\columnratio{ratio}` | `0.65` | Width of the left column in a two-column layout. Accepts a single number in the range (0, 1). |
 | `\cvnamesize` | `38` | Font size of the name in the header, in pt. |
