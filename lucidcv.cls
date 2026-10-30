@@ -501,6 +501,16 @@
   \endgroup
 }
 
+%% An icon glyph.
+%% Sets ActualText as empty to make text-layer extractors ignore it. With
+%% tagging, the icons are set as artifacts, so tag-order readers never see it.
+%% AtualText is deliberately not nested inside the text's marked-content seq.
+\newcommand{\lcv@icon}[1]{%
+  \if@lcv@tagging\lcv@artifactbegin\fi
+  \BeginAccSupp{method=escape,ActualText={}}#1\EndAccSupp{}%
+  \if@lcv@tagging\lcv@artifactend\pdffakespace\fi
+}
+
 %% Header contact-field infrastructure: \CvInfoField and the fields it makes.
 %% \ExplSyntaxOn makes an ordinary space catcode 9 (IGNORED) and `~' catcode 10
 %% (a space token). The `~' in \lcv@infoicon below is therefore a real space
@@ -516,8 +526,7 @@
 %% The `~' is a real space character; \cvinfoicongap adds additional visual gap
 \NewDocumentCommand{\lcv@infoicon}{m}{%
   \if@lcv@icons
-    \textcolor{accent}%
-      {\BeginAccSupp{method=escape,ActualText={}}\normalfont #1\EndAccSupp{}}%
+    \textcolor{accent}{\lcv@icon{\normalfont #1}}%
     ~\hspace{\cvinfoicongap}%
   \fi
 }
@@ -547,13 +556,16 @@
 %% The negative space backs out the preceding gap, landing the mark in between.
 %% Items are \mbox'd, so this is the line's only breakpoint; the mark sits in
 %% the no-break slot, so a wrap drops it. `penalty 1' is load-bearing.
+%% Wrapping leave no space glyph, so \pdffakespace is added to prevent fusing.
 \newcommand{\cvinfodelim}{%
   \unskip
   \nobreak
   \hspace{-\dimexpr\cvinfosepamount-\cvinfodelimgap\relax}%
+  \nobreak\pdffakespace\nobreak
   \discretionary penalty 1 {}{}{%
     \cvinfodelimmark
     \if@lcv@icons\kern\cvinfodelimgapicon\else\kern\cvinfodelimgap\fi}%
+  \nobreak\pdffakespace
 }
 %% Emitted ahead of each contact item.
 \newcommand{\lcv@infodelim}{%
@@ -568,9 +580,7 @@
 %% \lcv@refsymbol definition
 %% Arguments: #1 = symbol
 %% Reference icon symbols, substituting an empty string for ATS parsing
-\NewDocumentCommand{\lcv@refsymbol}{m}{%
-  \BeginAccSupp{method=escape,ActualText={}}#1\EndAccSupp{}%
-}
+\NewDocumentCommand{\lcv@refsymbol}{m}{\lcv@icon{#1}}
 
 %% \lcv@infoplain and \lcv@infolinked definitions -- contact item typesetting
 %% Kept as plain macros so the expl3 layer can hand them expanded arguments.
