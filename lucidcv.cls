@@ -1,7 +1,7 @@
 %% lucidcv.cls -- Lucid CV, an ATS-friendly résumé class.
 %%
 %% Author: Patrik Goldschmidt
-%% Date: 2026-08-19, last rev. 2026-10-07
+%% Date: 2026-08-19, last rev. 2026-10-30
 %%
 %% A LuaLaTeX class built around real-word-space PDF tagging, so the compiled
 %% résumé reads back correctly in ATS parsers and text extractors, not just on
@@ -9,7 +9,8 @@
 %%
 %% Requires LuaLaTeX and a LaTeX format of 2026-06-01 or newer. The fonts are
 %% loaded as .ttf files via fontspec from the fonts/ dir beside this class file,
-%% or through kpathsea when installed in a TeX distribution.
+%% or through kpathsea when installed in a TeX distribution, falling back to the
+%% distribution's .otf font packages (inter, sourcesans, sourcecodepro).
 %%
 %% Design inspired by PlushCV.cls
 %%  (c) Shubham Mazumder <http://mazumder.me>, Apache License 2.0
@@ -200,37 +201,80 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Fonts
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% .ttf fonts for better ATS parsability; .otf tend to fuse words together
-%% Font dirs: \cvfontdir if defined before \documentclass, else fonts/ beside
-%% this class (not the working dir), else kpathsea (TeX distribution install).
+%% .ttf fonts for better ATS parsability; .otf might fuse words together
+%% Font lookups per family with fallbacks:
+%% 1) .ttf in \cvfontdir if defined before \documentclass via \def\cvfontdir{},
+%%    else in fonts/ beside this class (not the working dir).
+%% 2) .ttf kpathsea search
+%% 3) .otf kpathsea fallback (TeX Live's inter, sourcesans and sourcecodepro)
+%%    with a warning, as OTFs might parse incorrectly.
+%% 4) None found: a class error naming the missing files and how to get them.
+%%
+%% Defines \lcv@<key>dir and \lcv@<key>ext for fontspec's Path and Extension,
+%% and \lcv@missingfonts when some family is not found.
 \directlua{
   lucidcv = lucidcv or {}
-  function lucidcv.fontdir(sub, file)
-    local cls = kpse.find_file("lucidcv.cls", "tex") or ""
-    local dir = cls:gsub("[^/]*$", "") .. "fonts/" .. sub
-    local found = lfs.isfile(dir .. file) and dir .. file
-      or kpse.find_file(file, "truetype fonts")
-    tex.sprint(-2, found and found:gsub("[^/]*$", "") or dir)
+  local cls = kpse.find_file("lucidcv.cls", "tex") or ""
+  local root = token.get_macro("cvfontdir")
+    or cls:gsub("[^/]*$", "") .. "fonts/"
+  local missing = {}
+
+  function lucidcv.findfont(key, sub, file)
+    local dir, ext = root .. sub, ".ttf"
+
+    if not lfs.isfile(dir .. file .. ext) then
+      local found = kpse.find_file(file .. ".ttf", "truetype fonts")
+
+      if not found then
+        found = kpse.find_file(file .. ".otf", "opentype fonts")
+        if found then
+          ext = ".otf"
+          luatexbase.module_warning("lucidcv", file .. ".ttf not found,"
+            .. " falling back to " .. found .. ". Use TTF fonts from GitHub "
+            .. "for best ATS compatibility.")
+        end
+      end
+
+      if found then
+        dir = found:gsub("[^/]*$", "")
+      else
+        table.insert(missing, dir .. file .. ".ttf")
+      end
+    end
+
+    token.set_macro("lcv@" .. key .. "dir", dir)
+    token.set_macro("lcv@" .. key .. "ext", ext)
+  end
+
+  lucidcv.findfont("inter", "inter/", "Inter-Light")
+  lucidcv.findfont("scp", "sourcecodepro/", "SourceCodePro-Light")
+  lucidcv.findfont("ssp", "sourcesans3/", "SourceSans3-Light")
+
+  if next(missing) then
+    % char 92 is a backslash; a literal one here would be expanded by TeX.
+    local br = string.char(92) .. "MessageBreak "
+    token.set_macro("lcv@missingfonts", br .. table.concat(missing, br))
   end
 }
-\ifdefined\cvfontdir
-  \edef\lcv@interdir{\cvfontdir inter/}
-  \edef\lcv@sspdir{\cvfontdir sourcesans3/}
-  \edef\lcv@scpdir{\cvfontdir sourcecodepro/}
-\else
-  \edef\lcv@interdir{\directlua{
-    lucidcv.fontdir("inter/", "Inter-Light.ttf")}}
-  \edef\lcv@sspdir{\directlua{
-    lucidcv.fontdir("sourcesans3/", "SourceSans3-Light.ttf")}}
-  \edef\lcv@scpdir{\directlua{
-    lucidcv.fontdir("sourcecodepro/", "SourceCodePro-Light.ttf")}}
+%% Nothing can be typeset without the fonts, so stop here rather than let
+%% fontspec bury this message under one error per missing font face.
+\ifdefined\lcv@missingfonts
+  \ClassError{lucidcv}{Fonts not found:\lcv@missingfonts\MessageBreak
+    For best ATS parsing, get the bundled TTF fonts\MessageBreak
+    from https://github.com/xGoldy/lucidcv into the\MessageBreak
+    fonts/ folder beside lucidcv.cls. As a fallback,\MessageBreak
+    you can install TeX Live's OTF versions with\MessageBreak
+    "tlmgr install inter sourcesans sourcecodepro"\MessageBreak
+    (these may lose phrases in some ATS text extractors)}
+    {The class needs Inter, Source Sans 3 and Source Code Pro.}
+  \csname @@end\endcsname
 \fi
 \defaultfontfeatures{Ligatures=TeX}
 
 %% Body: Inter Light / SemiBold
 \setmainfont{Inter}[
   Path=\lcv@interdir,
-  Extension=.ttf,
+  Extension=\lcv@interext,
   WordSpace=1.0,
   UprightFont=*-Light,
   BoldFont=*-SemiBold,
@@ -243,7 +287,7 @@
 %% Monospace (\texttt): Source Code Pro, Light / Semibold to match the body.
 \setmonofont{SourceCodePro}[
   Path=\lcv@scpdir,
-  Extension=.ttf,
+  Extension=\lcv@scpext,
   UprightFont=*-Light,
   BoldFont=*-Semibold,
   ItalicFont=*-LightIt,
@@ -254,7 +298,7 @@
 %% Manually set WordSpace=1.15 for ATS parsability.
 \newfontfamily\lcv@titlefont{SourceSans3}[
   Path=\lcv@sspdir,
-  Extension=.ttf,
+  Extension=\lcv@sspext,
   WordSpace=1.15,
   UprightFont=*-Semibold,
   BoldFont=*-Bold,
@@ -264,11 +308,11 @@
 %% Lighter Source Sans 3 variant
 \newfontfamily\lcv@lightfont{SourceSans3}[
   Path=\lcv@sspdir,
-  Extension=.ttf,
+  Extension=\lcv@sspext,
   WordSpace=1.15,
   UprightFont=*-Light,
   BoldFont=*-Semibold,
-  ItalicFont=*-It,
+  ItalicFont=*-RegularIt,
   BoldItalicFont=*-SemiboldIt
 ]
 

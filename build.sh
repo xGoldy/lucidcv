@@ -4,7 +4,7 @@
 # Engine: LuaLaTeX
 #
 # Author: Patrik Goldschmidt
-# Date: 2026-08-27, last update 2026-09-30
+# Date: 2026-08-27, last update 2026-10-30
 #
 #   ./build.sh                      build main.tex -> resume.pdf
 #   ./build.sh path/to.tex          build something else instead
@@ -42,9 +42,11 @@ run_pass() {
 
     if [[ -f "$1.log" ]]; then
       echo "--- error from $SRCDIR/$1.log ---" >&2
-      # `|| true': grep exits 1 when the log holds no `!' line, and pipefail
-      # would otherwise abort before the log path below is ever printed.
-      { grep -E '^(!|l\.[0-9])' "$1.log" || true; } | head -20 >&2
+      # Each error from its `!' line up to the first blank line, which keeps
+      # multi-line class and package errors whole, plus its `l.N' line.
+      awk '/^!/ { err = 1 }
+           /^$/ { err = 0 }
+           err || /^l\.[0-9]/' "$1.log" | head -30 >&2
       echo "--- full log: $SRCDIR/$1.log ---" >&2
     fi
     if [[ -f "$OUT" ]]; then
