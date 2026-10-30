@@ -317,6 +317,7 @@ The class raises the following warnings and one error:
 | --- | --- | --- |
 | Not compiled with LuaLaTeX | Error | Nothing else in the class can work. |
 | No `\DocumentMetadata` line at the top of the file | Warning | The PDF looks identical, but it is neither PDF/A nor PDF/UA, is not tagged, and does not contain real spaces between words. |
+| TTF fonts not found, falling back to the distribution's OTF versions | Warning | The PDF looks identical, but its text might extract less reliably. |
 | `\nametaggap` too small (below roughly -6pt) | Warning | The header looks fine, but some parsers might merge the name and tagline into a single line. |
 | A `\CvInfoField` scheme ending in neither `:` nor `//` | Warning | The printed text is correct, but the link target is broken. |
 | `\setcolumnwidth` used instead of `\columnratio` | Warning | No column ratio can be read, so the header falls back to `0.65`. |
@@ -324,6 +325,8 @@ The class raises the following warnings and one error:
 | `\cvphoto` placed after `\makecvheader` | Warning | Same as above. The photo must be declared before the header is built. |
 
 The photo warnings are the only exception to the general rule: their result is visible, but the cause is specific to this class and may not be obvious from the PDF alone.
+
+**Fonts.** The class uses bundled TTF font files in `fonts/`, which is searched first. If the fonts are missing, it searches the TeX distribution for the TTF files and then falls back to the distribution's OTF font versions with a warning. While the OTF versions compile and render correctly, they might extract less reliably with some PDF parsers. Precisely, the poppler extractor's default `pdftotext` lost 5 of 111 phrases in the default layout, and pdf.js 2.x and older, still embedded in some viewers, may run words together. Keep the bundled TTF files in place for the best ATS compatibility. For technical details, refer to extended documentation in [resources/docs.md](https://github.com/xGoldy/lucidcv/blob/main/resources/docs.md#why-the-fonts-are-bundled-not-loaded-from-ctan).
 
 The following mistakes are **not** reported, because their result is already apparent from the PDF:
 
