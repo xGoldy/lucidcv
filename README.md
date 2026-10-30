@@ -311,11 +311,12 @@ CV elements are predefined macros that carry content with additional formatting.
 
 Lucid CV warns primarily about problems that may not be visible in the rendered PDF. Each warning marks a document that compiles and looks correct on screen, but has a problem in the PDF structure, a link, or the text presented to PDF extractors and ATSs. Problems that are directly visible in the PDF are generally not reported, because the rendered document already shows them. If the log contains a `lucidcv` warning, the PDF alone may not reveal what is wrong.
 
-The class raises the following warnings and one error:
+The class raises the following warnings and two errors:
 
 | Condition | Type | Why it is reported |
 | --- | --- | --- |
 | Not compiled with LuaLaTeX | Error | Nothing else in the class can work. |
+| Neither TTF nor OTF fonts found | Error | The document cannot be typeset without its fonts. |
 | No `\DocumentMetadata` line at the top of the file | Warning | The PDF looks identical, but it is neither PDF/A nor PDF/UA, is not tagged, and does not contain real spaces between words. |
 | TTF fonts not found, falling back to the distribution's OTF versions | Warning | The PDF looks identical, but its text might extract less reliably. |
 | `\nametaggap` too small (below roughly -6pt) | Warning | The header looks fine, but some parsers might merge the name and tagline into a single line. |
@@ -326,7 +327,7 @@ The class raises the following warnings and one error:
 
 The photo warnings are the only exception to the general rule: their result is visible, but the cause is specific to this class and may not be obvious from the PDF alone.
 
-**Fonts.** The class uses bundled TTF font files in `fonts/`, which is searched first. If the fonts are missing, it searches the TeX distribution for the TTF files and then falls back to the distribution's OTF font versions with a warning. While the OTF versions compile and render correctly, they might extract less reliably with some PDF parsers. Precisely, the poppler extractor's default `pdftotext` lost 5 of 111 phrases in the default layout, and pdf.js 2.x and older, still embedded in some viewers, may run words together. Keep the bundled TTF files in place for the best ATS compatibility. For technical details, refer to extended documentation in [resources/docs.md](https://github.com/xGoldy/lucidcv/blob/main/resources/docs.md#why-the-fonts-are-bundled-not-loaded-from-ctan).
+**Fonts.** The class uses bundled TTF font files in `fonts/`, which is searched first. If the fonts are missing, it searches the TeX distribution for the TTF files and then falls back to the distribution's OTF font versions with a warning. If neither is found, compilation stops with an error. While the OTF versions compile and render correctly, they might extract less reliably with some PDF parsers. Precisely, the poppler extractor's default `pdftotext` lost 5 of 111 phrases in the default layout, and pdf.js 2.x and older, still embedded in some viewers, may run words together. Keep the bundled TTF files in place for the best ATS compatibility. For technical details, refer to extended documentation in [resources/docs.md](https://github.com/xGoldy/lucidcv/blob/main/resources/docs.md#why-the-fonts-are-bundled-not-loaded-from-ctan).
 
 The following mistakes are **not** reported, because their result is already apparent from the PDF:
 
