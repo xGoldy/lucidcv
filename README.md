@@ -67,7 +67,7 @@ All of the above is verified by the test suite described in [Testing for ATS Com
 
 ## 2. Examples
 
-The template ships with a sample resume, `contents.tex`, written for a senior software engineering role and compiled from `main.tex` out of the box. Other resume variants typeset to 1-column and 2-columns are provided in `resources/demos/`. They as a reference rather than a showcase, using every body macro provided by the class, with comments explaining each one. The sample persona, Adrian Castellanos, is fictional, as are the employers and referees. The photo is also AI-generated.
+The template ships with a sample resume, `contents.tex`, written for a senior software engineering role and compiled from `main.tex` out of the box. Other resume variants typeset in 1-column and 2-columns are provided in `resources/demos/`. They are a reference rather than a showcase, using every body macro provided by the class, with comments explaining each one. The sample persona, Adrian Castellanos, is fictional, as are the employers and referees. The photo is also AI-generated.
 
 For inspiration, the following subsections show three resume variants demonstrating how I used the class for real-world job applications. They are based on my own general-purpose resumes for cybersecurity and AI research positions.
 

@@ -50,7 +50,7 @@ package_readme() {
   local src="$1" dst="$2" blob="$REPO_URL/blob/$3"
 
   awk -v examples="$blob/README.md#2-examples" '
-    /^For additional inspiration, / {
+    /^For inspiration, / {
       print "For additional inspiration, three real-world resume variants are" \
             " shown in the [README on GitHub](" examples ")."
       skip = 1; next
